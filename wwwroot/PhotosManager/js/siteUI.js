@@ -1,6 +1,8 @@
 let contentScrollPosition = 0;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Views rendering
+
+renderLogin();
 function showWaitingGif() {
     eraseContent();
     $("#content").append($("<div class='waitingGifcontainer'><img class='waitingGif' src='images/Loading_icon.gif' /></div>'"));
@@ -40,4 +42,38 @@ function renderAbout() {
                 </p>
             </div>
         `))
+}
+
+function renderLogin(){
+    eraseContent();
+    UpdateHeader("Connexion", "connexion");
+
+    $("#content").append(
+        $(`
+            <h3>${loginMessage}</h3>
+            <form> class="form" id="loginForm">
+                <input type='email'
+                       name='Email'
+                       class='form-control'
+                       required
+                       RequireMessage = 'Veuillez entrer votre courriel'
+                       InvalidMessage = 'Courriel invalide'
+                       placeholder="adresse de courriel"
+                       value='${Email}'>
+                <span style='color:red'>${EmailError}</span>
+                <input> type='password'
+                        name='password'
+                        placeholder='Mot de passe'
+                        class="form-control"
+                        required
+                        RequireMessage = 'Veuillez entrer votre mot de passe'>
+                <span style='color:red'>${passwordError}</span>
+                <input type='submit' name='submit' value="Entrer" class="form-control btn-primary">
+            </form>
+            <div class="form">
+                <hr>
+                <button> class="form-control btn-info" id="createProfilCm">Nouveau Compte</button>
+            </div>      
+        `)
+    )
 }
