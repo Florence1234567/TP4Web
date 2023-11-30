@@ -1,6 +1,8 @@
 let contentScrollPosition = 0;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Views rendering
+
+updateHeader();
 function showWaitingGif() {
     eraseContent();
     $("#content").append($("<div class='waitingGifcontainer'><img class='waitingGif' src='images/Loading_icon.gif' /></div>'"));
@@ -15,7 +17,21 @@ function restoreContentScrollPosition() {
     $("#content")[0].scrollTop = contentScrollPosition;
 }
 function updateHeader() {
-    //todo
+    $("#header").append(
+        $(`
+            <span title="Connexion" id="ConnexionCmd">
+            <img src="images/PhotoCloudLogo.png" class="appLogo">
+            </span>
+            <span class="viewTitle">Connexion
+            </span>
+            <div class="headerMenusContainer">
+                <span>&nbsp;</span> <!--filler-->
+            
+                <div class="dropdown ms-auto dropdownLayout">
+                    <!-- Articles de menu -->
+                </div>
+            </div>
+        `))
 }
 function renderAbout() {
     timeout();
