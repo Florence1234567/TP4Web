@@ -1,11 +1,11 @@
 import Authorizations from '../authorizations.js';
 import Repository from '../models/repository.js';
-import WordModel from '../models/word.js';
+import PhotoModel from '../models/photo.js';
 import Controller from './Controller.js';
 
 export default
-    class WordsController extends Controller {
+    class Photos extends Controller {
         constructor(HttpContext) {
-            super(HttpContext, new Repository(new WordModel()), Authorizations.anonymous());
+            super(HttpContext, new Repository(new PhotoModel()), Authorizations.user());
         }
     }

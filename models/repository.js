@@ -4,6 +4,7 @@ import * as utilities from "../utilities.js";
 import { log } from "../log.js";
 import CollectionFilter from "./collectionFilter.js";
 import RepositoryCachesManager from "./repositoryCachesManager.js";
+import CachedRequests from "../CachedRequestsManager.js";
 
 globalThis.jsonFilesPath = "jsonFiles";
 globalThis.repositoryEtags = {};
@@ -58,19 +59,16 @@ export default class Repository {
       }
       write() {
         this.newETag();
+        CachedRequests.clear(this.objectsName);
         fs.writeFileSync(this.objectsFile, JSON.stringify(this.objectsList));
         if (this.cached) {
           RepositoryCachesManager.add(this.objectsName, this.objectsList);
         }
       }
-    nextId() {
-        let maxId = 0;
-        for (let object of this.objects()) {
-            if (object.Id > maxId) {
-                maxId = object.Id;
-            }
-        }
-        return maxId + 1;
+    createId() {
+        let newId = '';
+        do { newId = uuidv1(); } while(this.indexOf(newId) > -1);
+        return newId;
     }
     checkConflict(instance) {
         let conflict = false;
@@ -89,13 +87,13 @@ export default class Repository {
         if (this.model.state.isValid) {
             this.checkConflict(object);
             if (!this.model.state.inConflict) {
-                object.Id = this.nextId();
+                object.Id = this.createId();
                 this.model.handleAssets(object);
                 this.objectsList.push(object);
                 this.write();
             }
         }
-        return object;
+        return this.model.bindExtraData(object);
     }
     update(id, objectToModify) {
         delete objectToModify.Id;
@@ -115,7 +113,7 @@ export default class Repository {
                 this.model.state.notFound = true;
             }
         }
-        return objectToModify;
+        return this.model.bindExtraData(objectToModify);
     }
     remove(id) {
         let index = 0;
@@ -131,7 +129,7 @@ export default class Repository {
         return false;
     }
     getAll(params = null) {
-        let collectionFilter = new CollectionFilter(this.objects(), params, this.model);
+        let collectionFilter = new CollectionFilter(this.objects(), params);//, this.model);
         let objectsList = collectionFilter.get();
         let bindedDatas = [];
         if (objectsList)
@@ -142,7 +140,7 @@ export default class Repository {
     }
     get(id) {
         for (let object of this.objects()) {
-            if (object.Id === id) {
+            if (object.Id == id) {
                 return this.model.bindExtraData(object);
             }
         }
@@ -159,8 +157,8 @@ export default class Repository {
             let index = 0;
             for (let object of this.objects()) {
                 try {
-                    if (object[fieldName] === value) {
-                        if (object.Id != excludedId) return this.objectsList[index];
+                    if (object[fieldName] == value) {
+                        if (object.Id != excludedId) return {...this.objectsList[index]};
                     }
                     index++;
                 } catch (error) { break; }
@@ -171,7 +169,7 @@ export default class Repository {
     indexOf(id) {
         let index = 0;
         for (let object of this.objects()) {
-            if (object.Id === id) return index;
+            if (object.Id == id) return index;
             index++;
         }
         return -1;

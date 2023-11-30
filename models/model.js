@@ -8,14 +8,14 @@ import * as AssetsRepository from '../assetsManager.js';
 export default class Model {
     constructor() {
         this.fields = [];
-        this.addField('Id', 'integer');
+        this.addField('Id', 'object');
         this.key = null;
         this.state = { isValid: true, inConflict: false, notFound: false, errors: [] };
     }
     addField(propertyName, propertyType) {
         this.fields.push({ name: propertyName, type: propertyType });
     }
-    isMember(propertyName){
+    isMember(propertyName) {
         let exist = false;
         this.fields.forEach(field => {
             if (field.name == propertyName)
@@ -42,6 +42,7 @@ export default class Model {
                 case "email": return /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(value);
                 case "url": return /(http|https):\/\/(\w+:{0,1}\w*)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%!\-\/]))?/.test(value);
                 case "zipcode": return /^[a-zA-Z][0-9]+[a-zA-Z]\s[0-9]+[a-zA-Z][0-9]+$/.test(value);
+                case "object": return true;
                 case "asset": return true; // todo verify if it's a blob
                 default: return false;
             }
@@ -80,9 +81,13 @@ export default class Model {
                         instance[field.name] = storedInstance[field.name];
                     }
                 } else {
-                    instance[field.name] = AssetsRepository.save(instance[field.name]);
                     if (storedInstance != null) {
-                        AssetsRepository.remove(storedInstance[field.name]);
+                        if (instance[field.name] != storedInstance[field.name]) {
+                            instance[field.name] = AssetsRepository.save(instance[field.name]);
+                            AssetsRepository.remove(storedInstance[field.name]);
+                        }
+                    } else {
+                        instance[field.name] = AssetsRepository.save(instance[field.name]);
                     }
                 }
             }

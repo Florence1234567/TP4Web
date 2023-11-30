@@ -7,6 +7,8 @@ import MiddlewaresPipeline from './middlewaresPipeline.js';
 import * as router from './router.js';
 import { handleCORSPreflight } from './cors.js';
 import { handleStaticResourceRequest } from './staticResourcesServer.js';
+import CachedRequests from "./CachedRequestsManager.js";
+
 export default class APIServer {
     constructor(port = process.env.PORT || 5000) {
         this.port = port;
@@ -15,7 +17,6 @@ export default class APIServer {
         this.httpServer = createServer(async (req, res) => { this.handleHttpRequest(req, res) });
     }
     initMiddlewaresPipeline() {
-
         this.middlewaresPipeline = new MiddlewaresPipeline();
 
         // common middlewares
@@ -23,14 +24,17 @@ export default class APIServer {
         this.middlewaresPipeline.add(handleStaticResourceRequest);
 
         // API middlewares
-
+        this.middlewaresPipeline.add(CachedRequests.get);
+        this.middlewaresPipeline.add(router.TOKEN_EndPoint);
+        this.middlewaresPipeline.add(router.Registered_EndPoint);
         this.middlewaresPipeline.add(router.API_EndPoint);
     }
+    
     async handleHttpRequest(req, res) {
         this.markRequestProcessStartTime();
         this.httpContext = await HttpContext.create(req, res);
         this.showShortRequestInfo();
-        if (!this.middlewaresPipeline.handleHttpRequest(this.httpContext))
+        if (!(await this.middlewaresPipeline.handleHttpRequest(this.httpContext)))
             this.httpContext.response.notFound('this end point does not exist...');
         this.showRequestProcessTime();
     }
@@ -39,11 +43,11 @@ export default class APIServer {
     }
     startupMessage() {
         log(FgGreen, "************************************");
-        log(FgGreen, "* API SERVER - version beta - 1.92 *");
+        log(FgGreen, "* API SERVER - version beta - 2.00 *");
         log(FgGreen, "************************************");
         log(FgGreen, "* Author: Nicolas Chourot          *");
         log(FgGreen, "* Lionel-Groulx College            *");
-        log(FgGreen, "* Release date: october 2023       *");
+        log(FgGreen, "* Release date: november 2023      *");
         log(FgGreen, "************************************");
         log(FgWhite, BgGreen, `HTTP Server running on port ${this.port}...`);
         this.showMemoryUsage();

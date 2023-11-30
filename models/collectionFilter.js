@@ -1,5 +1,8 @@
 import * as utilities from '../utilities.js';
 
+// http://localhost:5000/api/bookmarks?fields=Category,Title&limit=3&offset=1&Category=c*&sort=Category&sort=Title,desc
+// http://localhost:5000/api/words?sort=Val,desc&limit=5&offset=20&Val=*z&fields=Val,Def,Gen
+
 export default class collectionFilter {
     constructor(collection, filterParams, model = null) {
 
@@ -11,8 +14,10 @@ export default class collectionFilter {
         this.filteredCollection = [];
         this.limit = 0;
         this.offset = 0;
+        this.prepareFilter(filterParams);
+    }
+    prepareFilter(filterParams) {
         let instance = this;
-
         if (filterParams != null) {
             Object.keys(filterParams).forEach(function (paramName) {
                 let paramValue = filterParams[paramName];
@@ -27,7 +32,6 @@ export default class collectionFilter {
                 }
             });
         }
-
         if (isNaN(this.limit) || isNaN(this.offset)) {
             this.limit = 0;
             this.offset = 0;
@@ -55,7 +59,6 @@ export default class collectionFilter {
             ascending: !descending
         };
     }
-
     setSortFields(fieldNames) {
 
         let sortField = null;
@@ -110,7 +113,6 @@ export default class collectionFilter {
         }
         return false;
     }
-
     equal(ox, oy) {
         let equal = true;
         Object.keys(ox).forEach(function (member) {
@@ -171,12 +173,10 @@ export default class collectionFilter {
         let max = this.sortFields.length;
         do {
             let result = 0;
-
             if (this.sortFields[fieldIndex].ascending)
                 result = this.innerCompare(itemX[this.sortFields[fieldIndex].name], itemY[this.sortFields[fieldIndex].name]);
             else
                 result = this.innerCompare(itemY[this.sortFields[fieldIndex].name], itemX[this.sortFields[fieldIndex].name]);
-
             if (result == 0)
                 fieldIndex++;
             else
@@ -207,28 +207,22 @@ export default class collectionFilter {
         }
         return filteredCollection;
     }
-
     get() {
         this.filteredCollection = this.findByKeys(this.collection);
         if (this.fields.length > 0) {
             this.filteredCollection = this.keepFields(this.filteredCollection);
             this.prevSortFields = [...this.sortFields];
             this.sortFields = [];
-            this.fields.forEach(fields => {
-                this.setSortFields(fields);
-            });
+            this.fields.forEach(fields => { this.setSortFields(fields); });
             this.filteredCollection.sort((a, b) => this.compare(a, b));
             this.filteredCollection = this.flushDuplicates(this.filteredCollection);
             this.sortFields = this.prevSortFields;
         }
-     
         if (this.sortFields.length > 0)
             this.sort();
-
         if (this.limit != 0) {
             return this.filteredCollection.slice(this.offset * this.limit, (this.offset + 1) * this.limit);
         }
-
         return this.filteredCollection;
     }
 }

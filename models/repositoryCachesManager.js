@@ -1,10 +1,10 @@
 import * as utilities from "../utilities.js";
 import * as serverVariables from "../serverVariables.js";
 import {log} from "../log.js";
-let repositoryCachesExpirationTime = serverVariables.get("main.repository.CacheExpirationTime");
+let repositoryCacheExpirationTime = serverVariables.get("main.repositoryCache.ExpirationTime");
 
 // Repository file data models cache
-globalThis.repositoryCaches = [];
+global.repositoryCaches = [];
 
 export default class RepositoryCachesManager {
     static add(model, data) {
@@ -13,21 +13,13 @@ export default class RepositoryCachesManager {
             repositoryCaches.push({
                 model,
                 data,
-                Expire_Time: utilities.nowInSeconds() + repositoryCachesExpirationTime
+                Expire_Time: utilities.nowInSeconds() + repositoryCacheExpirationTime
             });
             console.log("File data of " + model + ".json added in respository cache");
         }
     }
     static clear(model) {
-        if (model != "") {
-            let indexToDelete = [];
-            let index = 0;
-            for (let cache of repositoryCaches) {
-                if (cache.model == model) indexToDelete.push(index);
-                index++;
-            }
-            utilities.deleteByIndex(repositoryCaches, indexToDelete);
-        }
+        repositoryCaches = repositoryCaches.filter( cache => cache.model == model);
     }
     static find(model) {
         try {
@@ -35,7 +27,7 @@ export default class RepositoryCachesManager {
                 for (let cache of repositoryCaches) {
                     if (cache.model == model) {
                         // renew cache
-                        cache.Expire_Time = utilities.nowInSeconds() + repositoryCachesExpirationTime;
+                        cache.Expire_Time = utilities.nowInSeconds() + repositoryCacheExpirationTime;
                         console.log("File data of " + model + ".json retreived from respository cache");
                         return cache.data;
                     }
@@ -47,19 +39,15 @@ export default class RepositoryCachesManager {
         return null;
     }
     static flushExpired() {
-        let indexToDelete = [];
-        let index = 0;
         let now = utilities.nowInSeconds();
         for (let cache of repositoryCaches) {
             if (cache.Expire_Time < now) {
                 console.log("Cached file data of " + cache.model + ".json expired");
-                indexToDelete.push(index);
             }
-            index++;
         }
-        utilities.deleteByIndex(repositoryCaches, indexToDelete);
+        repositoryCaches = repositoryCaches.filter( cache => cache.Expire_Time > now);
     }
 }
 // periodic cleaning of expired cached repository data
-setInterval(RepositoryCachesManager.flushExpired, repositoryCachesExpirationTime * 1000);
-log(BgWhite, FgBlack, "Periodic repository caches cleaning process started...");
+setInterval(RepositoryCachesManager.flushExpired, repositoryCacheExpirationTime * 1000);
+log(BgWhite, FgBlack, "Periodic cached repositories cleaning process started...");
