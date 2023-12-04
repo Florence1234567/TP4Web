@@ -2,7 +2,6 @@ let contentScrollPosition = 0;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Views rendering
 
-updateHeader();
 renderLogin();
 function showWaitingGif() {
     eraseContent();
@@ -17,13 +16,13 @@ function saveContentScrollPosition() {
 function restoreContentScrollPosition() {
     $("#content")[0].scrollTop = contentScrollPosition;
 }
-function updateHeader() {
+function updateHeader(title, cmd) {
     $("#header").append(
         $(`
-            <span title="Connexion" id="ConnexionCmd">
+            <span title="${title}" id="${cmd}">
             <img src="images/PhotoCloudLogo.png" class="appLogo">
             </span>
-            <span class="viewTitle">Connexion
+            <span class="viewTitle">${title}
             </span>
             <div class="headerMenusContainer">
                 <span>&nbsp;</span> <!--filler-->
@@ -66,7 +65,7 @@ function renderLogin(){
     $("#content").append(
         $(`
             <h3>${loginMessage}</h3>
-            <form> class="form" id="loginForm">
+            <form class="form" id="loginForm">
                 <input type='email'
                        name='Email'
                        class='form-control'
