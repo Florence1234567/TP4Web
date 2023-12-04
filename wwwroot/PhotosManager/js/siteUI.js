@@ -66,6 +66,8 @@ function renderLogin(){
     let EmailError = "Courriel introuvable";
     let passwordError = "Mot de passe incorecte";
 
+
+    let loginMessage = "";
     $("#content").append(
         $(`
             <h3>${loginMessage}</h3>
