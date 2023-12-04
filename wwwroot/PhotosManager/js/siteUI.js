@@ -111,6 +111,16 @@ function renderLogin(loginMessage = ""){
             </div>      
         `)
     )
+
+    $("#loginForm").on("submit", async function(event) {
+        event.preventDefault();
+        let user = getFormData($("#loginForm"));
+        showWaitingGif();
+        //API saveUser
+        //Check siteUI ContactsManager
+        API.login(Email, password);
+        renderPhotos();
+    })
 }
 
 function createNewUser(){
@@ -232,4 +242,17 @@ function getFormData($form) {
         jsonObject[control.name] = control.value.replace(removeTag, "");
     });
     return jsonObject;
+}
+
+function renderPhotos(){
+    eraseContent();
+    updateHeader("Liste des photos");
+
+    $("#conten").append(
+        $(`
+        
+            <h1>TEMP PHOTOS PAGE</h1>
+        
+        `)
+    )
 }
