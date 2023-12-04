@@ -6,7 +6,7 @@ updateHeader();
 renderLogin();
 function showWaitingGif() {
     eraseContent();
-    $("#content").append($("<div class='waitingGifcontainer'><img class='waitingGif' src='images/Loading_icon.gif' /></div>'"));
+    $("#content").append($("<div class='waitingGifcontainer'><img class='waitingGif' src='images/Loading_icon.gif' /></div>"));
 }
 function eraseContent() {
     $("#content").empty();
@@ -60,13 +60,13 @@ function renderAbout() {
 }
 
 function renderLogin(){
-    eraseContent();
-    UpdateHeader("Connexion", "connexion");
+    //eraseContent();
+    //UpdateHeader("Connexion", "connexion");
 
     $("#content").append(
         $(`
             <h3>${loginMessage}</h3>
-            <form> class="form" id="loginForm">
+            <form class="form" id="loginForm">
                 <input type='email'
                        name='Email'
                        class='form-control'
