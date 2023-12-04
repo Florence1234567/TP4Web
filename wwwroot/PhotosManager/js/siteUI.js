@@ -74,13 +74,12 @@ function renderAbout() {
         `))
 }
 
-function renderLogin(){
+function renderLogin(loginMessage = ""){
     eraseContent();
     updateHeader("Connexion");
     let EmailError = "Courriel introuvable";
     let passwordError = "Mot de passe incorecte";
 
-    let loginMessage = "";
     let Email = "";
     let password = "";
     $("#content").append(
@@ -221,6 +220,8 @@ function renderRegister() {
         showWaitingGif();
         //API saveUser
         //Check siteUI ContactsManager
+        API.register(user);
+        renderLogin("Votre compte a été créé. Veuillez prendre vos courriels pour récupérer votre code de vérification qui vous sera demandé lors de votre prochaine connexion.");
     })
 }
 
