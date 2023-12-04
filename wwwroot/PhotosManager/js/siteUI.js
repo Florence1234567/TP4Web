@@ -68,6 +68,8 @@ function renderLogin(){
 
 
     let loginMessage = "";
+    let Email = "";
+    let password = "";
     $("#content").append(
         $(`
             <h3>${loginMessage}</h3>
@@ -86,7 +88,8 @@ function renderLogin(){
                         placeholder='Mot de passe'
                         class="form-control"
                         required
-                        RequireMessage = 'Veuillez entrer votre mot de passe'>
+                        RequireMessage = 'Veuillez entrer votre mot de passe'
+                        value='${password}'>
                 <span style='color:red'>${passwordError}</span>
                 <input type='submit' name='submit' value="Entrer" class="form-control btn-primary">
             </form>
