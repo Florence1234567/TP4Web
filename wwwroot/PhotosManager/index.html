@@ -27,7 +27,7 @@
             <!--Handled by siteUI.js-->
         </div>
         <div id="content">
-             <!--Handled by siteUI.js-->
+            <!--Handled by siteUI.js-->
         </div>
     </div>
     <!------------------------------------------------- SCRIPTS BUNDLE ------------------------------------------------------->
@@ -37,10 +37,17 @@
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
     <script src="js/api.js"></script>
     <script src="js/validation.js"></script>
-    <script src="js/imageControl.js"></script>
     <script src="js/date.js"></script>
-    <script src='js/session.js'></script>
-    <script src="js/siteUI.js">renderLogin();</script>
+    <script src="js/session.js"></script>
+    <script src="js/siteUI.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            console.log("Test");
+            updateHeader();
+            renderLogin();
+        });
+    </script>
 
     <!------------------------------------------------------------------------------------------------------------------------>
 </body>

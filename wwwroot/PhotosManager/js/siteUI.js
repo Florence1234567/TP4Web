@@ -18,6 +18,7 @@ function restoreContentScrollPosition() {
     $("#content")[0].scrollTop = contentScrollPosition;
 }
 function updateHeader() {
+    console.log("Test");
     $("#header").append(
         $(`
             <span title="Connexion" id="ConnexionCmd">
@@ -76,7 +77,7 @@ function renderLogin(){
                        placeholder="adresse de courriel"
                        value='${Email}'>
                 <span style='color:red'>${EmailError}</span>
-                <input> type='password'
+                <input type='password'
                         name='password'
                         placeholder='Mot de passe'
                         class="form-control"
@@ -87,7 +88,7 @@ function renderLogin(){
             </form>
             <div class="form">
                 <hr>
-                <button> class="form-control btn-info" id="createProfilCm">Nouveau Compte</button>
+                <button class="form-control btn-info" id="createProfilCm">Nouveau Compte</button>
             </div>      
         `)
     )
