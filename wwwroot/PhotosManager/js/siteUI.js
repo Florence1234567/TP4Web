@@ -63,6 +63,8 @@ function renderAbout() {
 function renderLogin(){
     //eraseContent();
     //UpdateHeader("Connexion", "connexion");
+    let EmailError = "Courriel introuvable";
+    let passwordError = "Mot de passe incorecte";
 
     $("#content").append(
         $(`
