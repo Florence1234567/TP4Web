@@ -18,7 +18,7 @@ function restoreContentScrollPosition() {
     $("#content")[0].scrollTop = contentScrollPosition;
 }
 function updateHeader(headerName) {
-    console.log("Test");
+    $("#header").empty();
     $("#header").append(
         $(`
             <span title="Connexion" id="ConnexionCmd">
