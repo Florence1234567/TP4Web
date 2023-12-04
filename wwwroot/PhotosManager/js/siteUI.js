@@ -2,8 +2,22 @@ let contentScrollPosition = 0;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Views rendering
 
-//updateHeader();
-//renderLogin();
+Init_UI();
+
+function Init_UI(){
+    renderLogin();
+    $("#createProfilCmd").on("click", function() {
+        saveContentScrollPosition();
+        renderRegister();
+    });
+
+    $("#abortCmd").on("click", function() {
+        saveContentScrollPosition();
+        eraseContent();
+        updateHeader("Connexion");
+        renderLogin();
+    });
+}
 function showWaitingGif() {
     eraseContent();
     $("#content").append($("<div class='waitingGifcontainer'><img class='waitingGif' src='images/Loading_icon.gif' /></div>"));
@@ -66,7 +80,6 @@ function renderLogin(){
     let EmailError = "Courriel introuvable";
     let passwordError = "Mot de passe incorecte";
 
-
     let loginMessage = "";
     let Email = "";
     let password = "";
@@ -95,14 +108,10 @@ function renderLogin(){
             </form>
             <div class="form">
                 <hr>
-                <button class="form-control btn-info" id="createProfilCm">Nouveau Compte</button>
+                <button class="form-control btn-info" id="createProfilCmd">Nouveau Compte</button>
             </div>      
         `)
     )
-
-    $("#createProfilCm").on("click", function() {
-        renderRegister();
-    });
 }
 
 function createNewUser(){
@@ -112,8 +121,7 @@ function createNewUser(){
     user.Password = "";
     user.Name = "";
     user.Avatar = "";
-    user.VerifyCode = "notVerified";
-    
+    user.VerifyCode = "notVerified"; 
     
     user.Phone = "";
     
@@ -205,7 +213,6 @@ function renderRegister() {
         <div class="cancel">
         <button class="form-control btn-secondary" id="abortCmd">Annuler</button>
         </div>
-        
         `)
     )
     $("#createProfilForm").on("submit", async function(event) {
@@ -215,12 +222,6 @@ function renderRegister() {
         //API saveUser
         //Check siteUI ContactsManager
     })
-
-    $("#abortCmd").on("click", function() {
-        eraseContent();
-        updateHeader("Connexion");
-        renderLogin();
-    });
 }
 
 function getFormData($form) {
