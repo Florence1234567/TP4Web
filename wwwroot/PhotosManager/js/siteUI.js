@@ -61,8 +61,8 @@ function renderAbout() {
 }
 
 function renderLogin(){
-    //eraseContent();
-    //UpdateHeader("Connexion", "connexion");
+    eraseContent();
+    updateHeader("Connexion");
     let EmailError = "Courriel introuvable";
     let passwordError = "Mot de passe incorecte";
 
@@ -99,9 +99,15 @@ function renderLogin(){
             </div>      
         `)
     )
+
+    $("#createProfilCm").on("click", function() {
+        renderRegister();
+    });
 }
 
 function renderRegister() {
+    eraseContent();
+    updateHeader("Inscription");
     $("#content").append(
         $(`
         <form class="form" id="createProfilForm"'>
@@ -172,4 +178,10 @@ function renderRegister() {
         
         `)
     )
+
+    $("#abortCmd").on("click", function() {
+        eraseContent();
+        updateHeader("Connexion");
+        renderLogin();
+    });
 }
