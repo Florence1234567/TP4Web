@@ -2,8 +2,8 @@ let contentScrollPosition = 0;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Views rendering
 
-updateHeader();
-renderLogin();
+//updateHeader();
+//renderLogin();
 function showWaitingGif() {
     eraseContent();
     $("#content").append($("<div class='waitingGifcontainer'><img class='waitingGif' src='images/Loading_icon.gif' /></div>"));
