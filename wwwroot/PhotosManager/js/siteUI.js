@@ -17,14 +17,14 @@ function saveContentScrollPosition() {
 function restoreContentScrollPosition() {
     $("#content")[0].scrollTop = contentScrollPosition;
 }
-function updateHeader() {
+function updateHeader(headerName) {
     console.log("Test");
     $("#header").append(
         $(`
             <span title="Connexion" id="ConnexionCmd">
             <img src="images/PhotoCloudLogo.png" class="appLogo">
             </span>
-            <span class="viewTitle">Connexion
+            <span class="viewTitle">${headerName}
             </span>
             <div class="headerMenusContainer">
                 <span>&nbsp;</span> <!--filler-->
