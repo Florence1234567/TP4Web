@@ -17,6 +17,13 @@ function Init_UI(){
         updateHeader("Connexion");
         renderLogin();
     });
+
+    $("#saveUserCmd").on("click", function() {
+        saveContentScrollPosition();
+        eraseContent();
+        updateHeader("Liste de photo");
+        renderLogin();
+    });
 }
 function showWaitingGif() {
     eraseContent();
@@ -31,7 +38,7 @@ function saveContentScrollPosition() {
 function restoreContentScrollPosition() {
     $("#content")[0].scrollTop = contentScrollPosition;
 }
-function updateHeader(headerName) {
+function updateHeader(headerName, cmd) {
     $("#header").empty();
     $("#header").append(
         $(`
