@@ -1,3 +1,5 @@
+import Authorizations from "../../../authorizations";
+import HttpContext from "../../../httpContext";
 let contentScrollPosition = 0;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Views rendering
@@ -125,8 +127,15 @@ function renderLogin(loginMessage = ""){
         showWaitingGif();
         //API saveUser
         //Check siteUI ContactsManager
+        
         API.login(Email, password);
-        renderPhotos();
+        if(Authorizations.granted(HttpContext.get(), Authorizations.user())){
+            renderPhotos();
+        }
+        else{
+            renderLogin("Accès non permis. Veuillez vous créer un compte.");
+        }
+            
     })
 }
 
