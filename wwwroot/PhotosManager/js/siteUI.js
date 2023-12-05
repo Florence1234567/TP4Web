@@ -81,13 +81,12 @@ function renderAbout() {
         `))
 }
 
-function renderLogin(){
+function renderLogin(loginMessage = ""){
     eraseContent();
     updateHeader("Connexion");
     let EmailError = "Courriel introuvable";
     let passwordError = "Mot de passe incorecte";
 
-    let loginMessage = "";
     let Email = "";
     let password = "";
     $("#content").append(
@@ -119,6 +118,16 @@ function renderLogin(){
             </div>      
         `)
     )
+
+    $("#loginForm").on("submit", async function(event) {
+        event.preventDefault();
+        let user = getFormData($("#loginForm"));
+        showWaitingGif();
+        //API saveUser
+        //Check siteUI ContactsManager
+        API.login(Email, password);
+        renderPhotos();
+    })
 }
 
 function createNewUser(){
@@ -228,6 +237,8 @@ function renderRegister() {
         showWaitingGif();
         //API saveUser
         //Check siteUI ContactsManager
+        API.register(user);
+        renderLogin("Votre compte a été créé. Veuillez prendre vos courriels pour récupérer votre code de vérification qui vous sera demandé lors de votre prochaine connexion.");
     })
 }
 
@@ -238,4 +249,17 @@ function getFormData($form) {
         jsonObject[control.name] = control.value.replace(removeTag, "");
     });
     return jsonObject;
+}
+
+function renderPhotos(){
+    eraseContent();
+    updateHeader("Liste des photos");
+
+    $("#conten").append(
+        $(`
+        
+            <h1>TEMP PHOTOS PAGE</h1>
+        
+        `)
+    )
 }
