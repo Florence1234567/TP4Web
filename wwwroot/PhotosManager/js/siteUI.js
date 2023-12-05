@@ -1,3 +1,5 @@
+
+
 let contentScrollPosition = 0;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Views rendering
@@ -127,12 +129,12 @@ function renderLogin(loginMessage = ""){
         //Check siteUI ContactsManager
         
         API.login(Email, password);
-        if(Authorizations.granted(HttpContext.get(), Authorizations.user())){
+        //if(Authorizations.granted(HttpContext.get(), Authorizations.user())){
             renderPhotos();
-        }
-        else{
-            renderLogin("Accès non permis. Veuillez vous créer un compte.");
-        }
+        //}
+        //else{
+         //   renderLogin("Accès non permis. Veuillez vous créer un compte.");
+        //}
             
     })
 }
