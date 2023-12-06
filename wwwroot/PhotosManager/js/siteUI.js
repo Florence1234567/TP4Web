@@ -1,4 +1,5 @@
-import Authorizations from "./authorizations";
+import Authorizations from "../../../authorizations";
+
 
 
 let contentScrollPosition = 0;
