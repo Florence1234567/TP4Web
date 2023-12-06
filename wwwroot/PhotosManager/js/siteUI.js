@@ -101,6 +101,7 @@ function renderLogin(loginMessage = "") {
             <h3>${loginMessage}</h3>
                 <input type='email'
                        name='Email'
+                       id='Email'
                        class='form-control'
                        required
                        RequireMessage = 'Veuillez entrer votre courriel'
