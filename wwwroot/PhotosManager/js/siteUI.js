@@ -128,6 +128,7 @@ function renderLogin(loginMessage = ""){
         //API saveUser
         //Check siteUI ContactsManager
         
+
         API.login(Email, password);
         //if(Authorizations.granted(HttpContext.get(), Authorizations.user())){
             renderPhotos();
@@ -140,7 +141,7 @@ function renderLogin(loginMessage = ""){
 }
 
 function createNewUser(){
-    user = {};
+    let user = { };
     user.Id = 0;
     user.Email = "";
     user.Password = "";
