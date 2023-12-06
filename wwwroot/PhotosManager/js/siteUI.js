@@ -253,9 +253,7 @@ function renderRegister() {
         let profil = getFormData($("createProfilForm"));
         delete profil.matchedPassword;
         delete profil.matchedEmail;
-        showWaitingGif();
-
-    showWaitingGif(); // afficher GIF d’attente
+        showWaitingGif(); // afficher GIF d’attente
     let result = await API.register(profil);
 
     if (result) {
