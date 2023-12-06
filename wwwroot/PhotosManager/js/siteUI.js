@@ -243,21 +243,23 @@ function renderRegister() {
     // ajouter le mécanisme de vérification de doublon de courriel
     addConflictValidation(API.checkConflictURL(), 'Email', 'saveUser');
     // call back la soumission du formulaire
-    $('#createProfilForm').on("submit", async function (event) {
-        event.preventDefault();// empêcher le fureteur de soumettre une requête de soumission
-        let profil = getFormData($('#createProfilForm'));   
-        delete profil.matchedPassword;
-        delete profil.matchedEmail;
+    
+    $("#createProfilForm").on("submit", async function (event) {
+        event.preventDefault();
+        let profil = getFormData($("createProfilForm"));
+        showWaitingGif(); 
 
-        showWaitingGif(); // afficher GIF d’attente
+        delete profil.matchedEmail;
+        delete profil.matchedPassword;
+
         let result = await API.register(profil);
 
-        if (result) {
+        if(result){
             renderLogin("Votre compte a été créé. Veuillez prendre vos courriels pour récupérer votre code de vérification qui vous sera demandé lors de votre prochaine connexion.");
         }
-        else {
+        else{
             renderLogin("La création du compte a échouée.");
-        } // commander la création au service API
+        }
     });
 
 }
