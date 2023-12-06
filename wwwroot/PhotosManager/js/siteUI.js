@@ -3,9 +3,16 @@ let contentScrollPosition = 0;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Views rendering
 
+let EmailError = "";
+let PasswordError = "";
+
+let Email = "";
+let Password = "";
 Init_UI();
 
 function Init_UI() {
+    API.initHttpState();
+
     renderLogin();
     $("#createProfilCmd").on("click", function () {
         saveContentScrollPosition();
@@ -82,13 +89,10 @@ function renderAbout() {
         `))
 }
 
-function renderLogin(loginMessage = "") {
+function renderLogin(loginMessage = "", user = createNewUser()) {
     eraseContent();
     updateHeader("Connexion");
-    let EmailError = "";
     let passwordError = "Mot de passe incorrect";
-
-    let user = createNewUser();
 
     $("#content").append(
         $(`
@@ -102,7 +106,7 @@ function renderLogin(loginMessage = "") {
                        RequireMessage = 'Veuillez entrer votre courriel'
                        InvalidMessage = 'Courriel invalide'
                        placeholder="Adresse de courriel"
-                       value='${user.Email}'>
+                       value='${Email}'>
                 <span style='color:red'>${EmailError}</span>
                 <input type='password'
                         name='password'
@@ -110,7 +114,7 @@ function renderLogin(loginMessage = "") {
                         class="form-control"
                         required
                         RequireMessage = 'Veuillez entrer votre mot de passe'
-                        value='${user.password}'>
+                        value='${Password}'>
                 <span style='color:red'>${passwordError}</span>
                 <input type='submit' name='submit' value="Entrer" class="form-control btn-primary">
             </form>
@@ -122,9 +126,18 @@ function renderLogin(loginMessage = "") {
     );
 
     document.getElementById("Email").addEventListener("change", (event) => {
-        console.log(API.currentStatus);
+        user = getFormData($("#loginForm"));
+        let result = API.login(user.Email, user.password);
+        console.log(result);
+        Email = user.Email;
+        Password = user.password;
         if(API.currentStatus == 481){
             EmailError = "Courriel introuvable";
+            renderLogin("", user);
+        }
+        else {
+            EmailError = "";
+            renderLogin("", user);
         }
       });
 
