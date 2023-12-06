@@ -122,6 +122,7 @@ function renderLogin(loginMessage = "") {
     );
 
     document.getElementById("Email").addEventListener("change", (event) => {
+        console.log(API.currentStatus);
         if(API.currentStatus == 481){
             EmailError = "Courriel introuvable";
         }
