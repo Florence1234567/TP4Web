@@ -256,18 +256,8 @@ function renderRegister() {
     $("#createProfilForm").on("submit", async function (event) {
         event.preventDefault();
         let profil = getFormData($("createProfilForm"));
-<<<<<<< HEAD
         delete profil.matchedPassword;
         delete profil.matchedEmail;
-        showWaitingGif(); // afficher GIF d’attente
-    let result = await API.register(profil);
-=======
-        showWaitingGif();
-
-        delete profil.matchedEmail;
-        delete profil.matchedPassword;
->>>>>>> ee293f9e98867c471d44f4d78ca1afd0713ec1cb
-
         showWaitingGif(); // afficher GIF d’attente
         let result = await API.register(profil);
         console.log(result);
