@@ -262,7 +262,7 @@ function renderRegister() {
         let result = await API.register(profil);
         console.log(result);
         if (result) {
-            renderLogin(
+            renderLogin( 
                 "Votre compte a été créé. Veuillez prendre vos courriels pour récupérer votre code de vérification qui vous sera demandé lors de votre prochaine connexion."
             );
         } else {
