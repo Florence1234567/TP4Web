@@ -83,67 +83,94 @@ function renderAbout() {
                 <p>
                     Collège Lionel-Groulx, automne 2023
                 </p>
-            </div>
-        `)
-    );
+            </div>`));
 }
 
 function renderLogin(loginMessage = "") {
     eraseContent();
     updateHeader("Connexion");
-    let passwordError = "Mot de passe incorrect";
-
-    let user = createNewUser();
 
     $("#content").append(
-        $(`
-            <form class="form" id="loginForm">
+        $(`<div class="content" style="text-align:center">
             <h3>${loginMessage}</h3>
+            <form class="form" id="loginForm">
                 <input type='email'
-                       name='Email'
-                       class='form-control'
-                       required
-                       RequireMessage = 'Veuillez entrer votre courriel'
-                       InvalidMessage = 'Courriel invalide'
-                       placeholder="Adresse de courriel"
-                       value='${Email}'>
+                name='Email'
+                class="form-control"
+                required
+                RequireMessage = 'Veuillez entrer votre courriel'
+                InvalidMessage = 'Courriel invalide'
+                placeholder="Adresse courriel"
+                value='${Email}'>
                 <span style='color:red'>${EmailError}</span>
                 <input type='password'
-                        name='password'
-                        placeholder='Mot de passe'
-                        class="form-control"
-                        required
-                        RequireMessage = 'Veuillez entrer votre mot de passe'
-                        value='${Password}'>
-                <span style='color:red'>${passwordError}</span>
+                name='Password'
+                placeholder='Mot de passe'
+                class="form-control"
+                required
+                RequireMessage = 'Veuillez entrer votre mot de passe'>
+                <span style='color:red'>${PasswordError}</span>
                 <input type='submit' name='submit' value="Entrer" class="form-control btn-primary">
             </form>
-            <div class="form">
-                <hr>
-                <button class="form-control btn-info" id="createProfilCmd">Nouveau Compte</button>
-            </div>      
-        `)
-    );
+        <div class="form">
+            <hr>
+            <button class="form-control btn-info" id="createProfilCmd">Nouveau compte</button>
+        </div>
+        </div>`));
 
     $("#loginForm").on("submit", async function (event) {
         event.preventDefault();
         showWaitingGif();
-        //API saveUser
-        //Check siteUI ContactsManager
-
-        let result = await API.login(Email, Password);
+        let user = createNewUser();
+        user = getFormData($("#loginForm"));
+        let result = await API.login(user.Email, user.password);
         if (API.currentStatus == 481) {
-            EmailError = "Courriel introuvable";
+            EmailError = "Courriel invalide";
+        }
+        else if (API.currentStatus == 482) {
+            PasswordError = "Mot de passe incorrect";
         }
         else {
             EmailError = "";
+            PasswordError = "";
         }
         if (result) {
+            API.storeLoggedUser(user);
             renderPhotos();
         } else {
             renderLogin("Compte introuvable");
         }
     });
+}
+
+function reloadLogin(Email) {
+    eraseContent();
+    $("#content").append(
+        $(`<div class="content" style="text-align:center">
+            <form class="form" id="loginForm">
+                <input type='email'
+                name='Email'
+                class="form-control"
+                required
+                RequireMessage = 'Veuillez entrer votre courriel'
+                InvalidMessage = 'Courriel invalide'
+                placeholder="Adresse courriel"
+                value='${Email}'>
+                <span style='color:red'>${EmailError}</span>
+                <input type='password'
+                name='Password'
+                placeholder='Mot de passe'
+                class="form-control"
+                required
+                RequireMessage = 'Veuillez entrer votre mot de passe'>
+                <span style='color:red'>${PasswordError}</span>
+                <input type='submit' name='submit' value="Entrer" class="form-control btn-primary">
+            </form>
+        <div class="form">
+            <hr>
+            <button class="form-control btn-info" id="createProfilCmd">Nouveau compte</button>
+        </div>
+        </div>`));
 }
 
 function createNewUser() {
@@ -263,14 +290,13 @@ function renderRegister() {
 
         showWaitingGif(); // afficher GIF d’attente
         let result = await API.register(profil);
-        console.log(result);
         if (result) {
             renderLogin(
                 "Votre compte a été créé. Veuillez prendre vos courriels pour récupérer votre code de vérification qui vous sera demandé lors de votre prochaine connexion."
             );
         } else {
             renderLogin("La création du compte a échouée.");
-        } // commander la création au service API
+        }
     });
 }
 
@@ -287,11 +313,9 @@ function renderPhotos() {
     eraseContent();
     updateHeader("Liste des photos");
 
-    $("#conten").append(
+    $("#content").append(
         $(`
-        
             <h1>TEMP PHOTOS PAGE</h1>
-        
         `)
     );
 }
