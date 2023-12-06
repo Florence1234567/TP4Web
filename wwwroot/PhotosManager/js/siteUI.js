@@ -1,4 +1,3 @@
-//import Authorizations from "../../../authorizations";
 
 let contentScrollPosition = 0;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -89,8 +88,8 @@ function renderLogin(loginMessage = ""){
     let EmailError = "Courriel introuvable";
     let passwordError = "Mot de passe incorecte";
 
-    let Email = "";
-    let password = "";
+    let user = createNewUser();
+
     $("#content").append(
         $(`
             <h3>${loginMessage}</h3>
@@ -102,7 +101,7 @@ function renderLogin(loginMessage = ""){
                        RequireMessage = 'Veuillez entrer votre courriel'
                        InvalidMessage = 'Courriel invalide'
                        placeholder="adresse de courriel"
-                       value='${Email}'>
+                       value='${user.Email}'>
                 <span style='color:red'>${EmailError}</span>
                 <input type='password'
                         name='password'
@@ -110,7 +109,7 @@ function renderLogin(loginMessage = ""){
                         class="form-control"
                         required
                         RequireMessage = 'Veuillez entrer votre mot de passe'
-                        value='${password}'>
+                        value='${user.password}'>
                 <span style='color:red'>${passwordError}</span>
                 <input type='submit' name='submit' value="Entrer" class="form-control btn-primary">
             </form>
@@ -128,8 +127,14 @@ function renderLogin(loginMessage = ""){
         //API saveUser
         //Check siteUI ContactsManager
         
-
-        API.login(Email, password);
+        
+        let result = await API.login(user.Email, user.password);
+        if(result){
+            renderPhotos();
+        }
+        else{
+            renderLogin("Accès non permis. Veuillez vous créer un compte.");
+        }
         //if(Authorizations.granted(HttpContext.get(), Authorizations.anonymous())){
          //   renderPhotos();
         //}
@@ -147,7 +152,12 @@ function createNewUser(){
     user.Password = "";
     user.Name = "";
     user.Avatar = "";
-    user.VerifyCode = "notVerified"; 
+    user.Created = 1;
+    user.Authorizations = {
+        readaccess: 0,
+        writeaccess: 0
+    }
+    user.VerifyCode = "unverified"; 
     
     user.Phone = "";
     
@@ -155,101 +165,109 @@ function createNewUser(){
 }
 
 function renderRegister() {
-    eraseContent();
-    updateHeader("Inscription");
+    noTimeout(); // ne pas limiter le temps d’inactivité
+    eraseContent(); // effacer le conteneur #content
+    updateHeader("Inscription"); // mettre à jour l’entête et menu
+    $("#newPhotoCmd").hide(); // camouffler l’icone de commande d’ajout de photo
+    $("#content").append(`
+            <form class="form" id="createProfilForm"'>
+                <fieldset>
+                    <legend>Adresse ce courriel</legend>
+                    <input type="email"
+                    class="form-control Email"
+                    name="Email"
+                    id="Email"
+                    placeholder="Courriel"
+                    required
+                    RequireMessage = 'Veuillez entrer votre courriel'
+                    InvalidMessage = 'Courriel invalide'
+                    CustomErrorMessage ="Ce courriel est déjà utilisé"/>
 
-    let newUser = createNewUser();
-    let emailValidation;
-    let passwordValidation;
-    $("#content").append(
-        $(`
-        <form class="form" id="createProfilForm"'>
-            <fieldset>
-            <legend>Adresse ce courriel</legend>
-                <input type="email"
-                class="form-control Email"
-                name="Email"
-                id="Email"
-                placeholder="Courriel"
-                required
-                RequireMessage = 'Veuillez entrer votre courriel'
-                InvalidMessage = 'Courriel invalide'
-                CustomErrorMessage ="Ce courriel est déjà utilisé"
-                value="${newUser.Email}"/>
 
-                <input class="form-control MatchedInput"
-                type="text"
-                matchedInputId="Email"
-                name="matchedEmail"
-                id="matchedEmail"
-                placeholder="Vérification"
-                required
-                RequireMessage = 'Veuillez entrez de nouveau votre courriel'
-                InvalidMessage="Les courriels ne correspondent pas" 
-                value="${emailValidation}"/>
-            </fieldset>
+                    <input class="form-control MatchedInput"
+                    type="text"
+                    matchedInputId="Email"
+                    name="matchedEmail"
+                    id="matchedEmail"
+                    placeholder="Vérification"
+                    required
+                    RequireMessage = 'Veuillez entrez de nouveau votre courriel'
+                    InvalidMessage="Les courriels ne correspondent pas" />
+                </fieldset>
 
-            <fieldset>
-            <legend>Mot de passe</legend>
-                <input type="password"
-                class="form-control"
-                name="Password"
-                id="Password"
-                placeholder="Mot de passe"
-                required
-                RequireMessage = 'Veuillez entrer un mot de passe'
-                InvalidMessage = 'Mot de passe trop court'
-                value="${newUser.Password}"/>
+                <fieldset>
+                <legend>Mot de passe</legend>
+                    <input type="password"
+                    class="form-control"
+                    name="Password"
+                    id="Password"
+                    placeholder="Mot de passe"
+                    required
+                    RequireMessage = 'Veuillez entrer un mot de passe'
+                    InvalidMessage = 'Mot de passe trop court'/>
+                
+                    <input class="form-control MatchedInput"
+                    type="password"
+                    matchedInputId="Password"
+                    name="matchedPassword"
+                    id="matchedPassword"
+                    placeholder="Vérification" required
+                    InvalidMessage="Ne correspond pas au mot de passe" />
 
-                <input class="form-control MatchedInput"
-                type="password"
-                matchedInputId="Password"
-                name="matchedPassword"
-                id="matchedPassword"
-                placeholder="Vérification" required
-                InvalidMessage="Ne correspond pas au mot de passe" 
-                value="${passwordValidation}"/>
+                </fieldset>
+                <fieldset>
+                <legend>Nom</legend>
+                    <input type="text"
+                    class="form-control Alpha"
+                    name="Name"
+                    id="Name"
+                    placeholder="Nom"
+                    required
+                    RequireMessage = 'Veuillez entrer votre nom'
+                    InvalidMessage = 'Nom invalide'/>
+                </fieldset>
 
-            </fieldset>
-            <fieldset>
-            <legend>Nom</legend>
-                <input type="text"
-                class="form-control Alpha"
-                name="Name"
-                id="Name"
-                placeholder="Nom"
-                required
-                RequireMessage = 'Veuillez entrer votre nom'
-                InvalidMessage = 'Nom invalide'
-                value="${newUser.Name}"/>
-            </fieldset>
-
-            <fieldset>
-            <legend>Avatar</legend>
-                <div class='imageUploader'
-                newImage='true'
-                controlId='Avatar'
-                imageSrc='images/no-avatar.png'
-                waitingImage="${newUser.Avatar}">
-                </div>
-            </fieldset>
-            <input type='submit' name='submit' id='saveUserCmd' value="Enregistrer" class="form-control btn-primary">
+                <fieldset>
+                <legend>Avatar</legend>
+                    <div class='imageUploader'
+                        newImage='true'
+                        controlId='Avatar'
+                        imageSrc='images/no-avatar.png'
+                        waitingImage="images/Loading_icon.gif">
+                    </div>
+                </fieldset>
+                <input type='submit' name='submit' id='saveUserCmd' value="Enregistrer" class="form-control btn-primary">
         </form>
 
         <div class="cancel">
         <button class="form-control btn-secondary" id="abortCmd">Annuler</button>
         </div>
-        `)
-    )
-    $("#createProfilForm").on("submit", async function(event) {
-        event.preventDefault();
-        let user = getFormData($("#createProfilForm"));
-        showWaitingGif();
-        //API saveUser
-        //Check siteUI ContactsManager
-        API.register(user);
-        renderLogin("Votre compte a été créé. Veuillez prendre vos courriels pour récupérer votre code de vérification qui vous sera demandé lors de votre prochaine connexion.");
-    })
+    `);
+
+    $('#loginCmd').on('click', renderLogin); // call back sur clic
+    initFormValidation();
+    initImageUploaders();
+    $('#abortCmd').on('click', renderLogin); // call back sur clic
+    // ajouter le mécanisme de vérification de doublon de courriel
+    addConflictValidation(API.checkConflictURL(), 'Email', 'saveUser');
+    // call back la soumission du formulaire
+    $('#createProfilForm').on("submit", async function (event) {
+        event.preventDefault();// empêcher le fureteur de soumettre une requête de soumission
+        let profil = getFormData($('#createProfilForm'));
+        delete profil.matchedPassword;
+        delete profil.matchedEmail;
+    
+        showWaitingGif(); // afficher GIF d’attente
+        let result = await API.register(profil);
+
+        if(result){
+            renderLogin("Votre compte a été créé. Veuillez prendre vos courriels pour récupérer votre code de vérification qui vous sera demandé lors de votre prochaine connexion.");
+        }
+        else{
+            renderLogin("La création du compte a échouée.");
+        } // commander la création au service API
+    });
+
 }
 
 function getFormData($form) {
