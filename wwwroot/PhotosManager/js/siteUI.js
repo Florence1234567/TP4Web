@@ -2,16 +2,21 @@ let contentScrollPosition = 0;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Views rendering
 
-let EmailError = "";
-let PasswordError = "";
-
-let Email = "";
-let Password = "";
 Init_UI();
 
 function Init_UI() {
-    API.initHttpState();
+  renderLogin();
+  $("#createProfilCmd").on("click", function () {
+    saveContentScrollPosition();
+    renderRegister();
+  });
+
+  $("#abortCmd").on("click", function () {
+    saveContentScrollPosition();
+    eraseContent();
+    updateHeader("Connexion");
     renderLogin();
+  });
 
   $("#saveUserCmd").on("click", function () {
     saveContentScrollPosition();
@@ -82,24 +87,26 @@ function renderAbout() {
   );
 }
 
-function renderLogin(loginMessage = "", user = createNewUser()) {
-    eraseContent();
-    updateHeader("Connexion");
-    let passwordError = "Mot de passe incorrect";
+function renderLogin(loginMessage = "") {
+  eraseContent();
+  updateHeader("Connexion");
+  let EmailError = "";
+  let passwordError = "Mot de passe incorrect";
 
-    $("#content").append(
-        $(`
+  let user = createNewUser();
+
+  $("#content").append(
+    $(`
             <form class="form" id="loginForm">
             <h3>${loginMessage}</h3>
                 <input type='email'
                        name='Email'
-                       id='Email'
                        class='form-control'
                        required
                        RequireMessage = 'Veuillez entrer votre courriel'
                        InvalidMessage = 'Courriel invalide'
-                       placeholder="Adresse de courriel"
-                       value='${Email}'>
+                       placeholder="adresse de courriel"
+                       value='${user.Email}'>
                 <span style='color:red'>${EmailError}</span>
                 <input type='password'
                         name='password'
@@ -107,7 +114,7 @@ function renderLogin(loginMessage = "", user = createNewUser()) {
                         class="form-control"
                         required
                         RequireMessage = 'Veuillez entrer votre mot de passe'
-                        value='${Password}'>
+                        value='${user.password}'>
                 <span style='color:red'>${passwordError}</span>
                 <input type='submit' name='submit' value="Entrer" class="form-control btn-primary">
             </form>
@@ -116,23 +123,7 @@ function renderLogin(loginMessage = "", user = createNewUser()) {
                 <button class="form-control btn-info" id="createProfilCmd">Nouveau Compte</button>
             </div>      
         `)
-    );
-
-    //document.getElementById("Email").addEventListener("change", (event) => {
-        //user = getFormData($("#loginForm"));
-        //let result = API.login(user.Email, user.password);
-        //console.log(result);
-        //Email = user.Email;
-        //Password = user.password;
-        //if(API.currentStatus == 481){
-           // EmailError = "Courriel introuvable";
-         //   renderLogin("", user);
-        //}
-        //else {
-            //EmailError = "";
-          //  renderLogin("", user);
-        //}
-      //});
+    )
 
     $("#loginForm").on("submit", async function (event) {
         event.preventDefault();
@@ -141,13 +132,13 @@ function renderLogin(loginMessage = "", user = createNewUser()) {
         //API saveUser
         //Check siteUI ContactsManager
 
-    let result = await API.login(user.Email, user.password);
-    if (result) {
-      renderPhotos();
-    } else {
-      renderLogin("Compte introuvable");
-    }
-  });
+        let result = await API.login(user.Email, user.password);
+        if (result) {
+        renderPhotos();
+        } else {
+        renderLogin("Compte introuvable");
+        }
+    });
 }
 
 function createNewUser() {
@@ -260,14 +251,13 @@ function renderRegister() {
     $("#createProfilForm").on("submit", async function (event) {
         event.preventDefault();
         let profil = getFormData($("createProfilForm"));
-        showWaitingGif();
-
-        delete profil.matchedEmail;
         delete profil.matchedPassword;
+        delete profil.matchedEmail;
+        showWaitingGif();
 
     showWaitingGif(); // afficher GIF d’attente
     let result = await API.register(profil);
-        console.log(result);
+
     if (result) {
       renderLogin(
         "Votre compte a été créé. Veuillez prendre vos courriels pour récupérer votre code de vérification qui vous sera demandé lors de votre prochaine connexion."
