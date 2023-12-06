@@ -1,3 +1,5 @@
+//import Authorizations from "../../../authorizations";
+
 let contentScrollPosition = 0;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Views rendering
@@ -125,13 +127,21 @@ function renderLogin(loginMessage = ""){
         showWaitingGif();
         //API saveUser
         //Check siteUI ContactsManager
+        
+
         API.login(Email, password);
-        renderPhotos();
+        //if(Authorizations.granted(HttpContext.get(), Authorizations.anonymous())){
+         //   renderPhotos();
+        //}
+        //else{
+         //  renderLogin("Accès non permis. Veuillez vous créer un compte.");
+       // }
+            
     })
 }
 
 function createNewUser(){
-    user = {};
+    let user = { };
     user.Id = 0;
     user.Email = "";
     user.Password = "";
