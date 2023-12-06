@@ -10,8 +10,14 @@ let Password = "";
 Init_UI();
 
 function Init_UI() {
-    API.initHttpState();
     renderLogin();
+
+    $("#createProfilCmd").on("click", function () {
+        saveContentScrollPosition();
+        eraseContent();
+        updateHeader("Inscription");
+        renderRegister();
+      });
 
   $("#saveUserCmd").on("click", function () {
     saveContentScrollPosition();
@@ -82,10 +88,12 @@ function renderAbout() {
   );
 }
 
-function renderLogin(loginMessage = "", user = createNewUser()) {
+function renderLogin(loginMessage = "") {
     eraseContent();
     updateHeader("Connexion");
     let passwordError = "Mot de passe incorrect";
+
+    let user = createNewUser();
 
     $("#content").append(
         $(`
@@ -93,12 +101,13 @@ function renderLogin(loginMessage = "", user = createNewUser()) {
             <h3>${loginMessage}</h3>
                 <input type='email'
                        name='Email'
+                       id='Email'
                        class='form-control'
                        required
                        RequireMessage = 'Veuillez entrer votre courriel'
                        InvalidMessage = 'Courriel invalide'
                        placeholder="Adresse de courriel"
-                       value='${Email}'>
+                       value='${user.Email}'>
                 <span style='color:red'>${EmailError}</span>
                 <input type='password'
                         name='password'
@@ -106,7 +115,7 @@ function renderLogin(loginMessage = "", user = createNewUser()) {
                         class="form-control"
                         required
                         RequireMessage = 'Veuillez entrer votre mot de passe'
-                        value='${Password}'>
+                        value='${user.password}'>
                 <span style='color:red'>${passwordError}</span>
                 <input type='submit' name='submit' value="Entrer" class="form-control btn-primary">
             </form>
@@ -117,10 +126,8 @@ function renderLogin(loginMessage = "", user = createNewUser()) {
         `)
     );
 
-    document.getElementById("Email").addEventListener("change", (event) => {
+    /*document.getElementById("Email").addEventListener("change", (event) => {
         user = getFormData($("#loginForm"));
-        let result = API.login(user.Email, user.password);
-        console.log(result);
         Email = user.Email;
         Password = user.password;
         if(API.currentStatus == 481){
@@ -131,7 +138,7 @@ function renderLogin(loginMessage = "", user = createNewUser()) {
             EmailError = "";
             renderLogin("", user);
         }
-      });
+      });*/
 
     $("#loginForm").on("submit", async function (event) {
         event.preventDefault();
