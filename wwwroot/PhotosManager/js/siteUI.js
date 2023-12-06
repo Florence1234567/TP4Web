@@ -2,21 +2,16 @@ let contentScrollPosition = 0;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Views rendering
 
+let EmailError = "";
+let PasswordError = "";
+
+let Email = "";
+let Password = "";
 Init_UI();
 
 function Init_UI() {
-  renderLogin();
-  $("#createProfilCmd").on("click", function () {
-    saveContentScrollPosition();
-    renderRegister();
-  });
-
-  $("#abortCmd").on("click", function () {
-    saveContentScrollPosition();
-    eraseContent();
-    updateHeader("Connexion");
+    API.initHttpState();
     renderLogin();
-  });
 
   $("#saveUserCmd").on("click", function () {
     saveContentScrollPosition();
@@ -87,16 +82,13 @@ function renderAbout() {
   );
 }
 
-function renderLogin(loginMessage = "") {
+function renderLogin(loginMessage = "", user = createNewUser()) {
     eraseContent();
     updateHeader("Connexion");
-    let EmailError = "Courriel introuvable";
     let passwordError = "Mot de passe incorrect";
 
-  let user = createNewUser();
-
-  $("#content").append(
-    $(`
+    $("#content").append(
+        $(`
             <form class="form" id="loginForm">
             <h3>${loginMessage}</h3>
                 <input type='email'
@@ -106,8 +98,8 @@ function renderLogin(loginMessage = "") {
                        required
                        RequireMessage = 'Veuillez entrer votre courriel'
                        InvalidMessage = 'Courriel invalide'
-                       placeholder="adresse de courriel"
-                       value='${user.Email}'>
+                       placeholder="Adresse de courriel"
+                       value='${Email}'>
                 <span style='color:red'>${EmailError}</span>
                 <input type='password'
                         name='password'
@@ -115,7 +107,7 @@ function renderLogin(loginMessage = "") {
                         class="form-control"
                         required
                         RequireMessage = 'Veuillez entrer votre mot de passe'
-                        value='${user.password}'>
+                        value='${Password}'>
                 <span style='color:red'>${passwordError}</span>
                 <input type='submit' name='submit' value="Entrer" class="form-control btn-primary">
             </form>
@@ -124,7 +116,23 @@ function renderLogin(loginMessage = "") {
                 <button class="form-control btn-info" id="createProfilCmd">Nouveau Compte</button>
             </div>      
         `)
-    )
+    );
+
+    document.getElementById("Email").addEventListener("change", (event) => {
+        user = getFormData($("#loginForm"));
+        let result = API.login(user.Email, user.password);
+        console.log(result);
+        Email = user.Email;
+        Password = user.password;
+        if(API.currentStatus == 481){
+            EmailError = "Courriel introuvable";
+            renderLogin("", user);
+        }
+        else {
+            EmailError = "";
+            renderLogin("", user);
+        }
+      });
 
     $("#loginForm").on("submit", async function (event) {
         event.preventDefault();
