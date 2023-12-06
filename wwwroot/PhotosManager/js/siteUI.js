@@ -7,24 +7,26 @@ let PasswordError = "";
 
 let Email = "";
 let Password = "";
+
+let loggedUser;
 Init_UI();
 
 function Init_UI() {
-    renderLogin();
+  renderLogin();
 
-    $("#createProfilCmd").on("click", function () {
-        saveContentScrollPosition();
-        eraseContent();
-        updateHeader("Inscription");
-        renderRegister();
-    });
+  $("#createProfilCmd").on("click", function () {
+    saveContentScrollPosition();
+    eraseContent();
+    updateHeader("Inscription");
+    renderRegister();
+  });
 
-    $("#saveUserCmd").on("click", function () {
-        saveContentScrollPosition();
-        eraseContent();
-        updateHeader("Liste de photo");
-        renderPhotos();
-    });
+  $("#saveUserCmd").on("click", function () {
+    saveContentScrollPosition();
+    eraseContent();
+    updateHeader("Liste de photo");
+    renderPhotos();
+  });
 }
 function showWaitingGif() {
     eraseContent();
@@ -90,7 +92,8 @@ function renderAbout() {
                 <p>
                     Collège Lionel-Groulx, automne 2023
                 </p>
-            </div>`));
+            </div>`)
+  );
 }
 
 function renderLogin(loginMessage = "") {
@@ -128,7 +131,7 @@ function renderLogin(loginMessage = "") {
                 <button class="form-control btn-info" id="createProfilCmd">Nouveau Compte</button>
             </div>      
         `)
-    );
+  );
 
     $("#loginForm").on("submit", async function (event) {
         event.preventDefault();
@@ -254,29 +257,29 @@ function renderRegister() {
         </div>
     `);
 
-    $('#loginCmd').on('click', renderLogin); // call back sur clic
-    initFormValidation();
-    initImageUploaders();
-    $('#abortCmd').on('click', renderLogin); // call back sur clic
-    // ajouter le mécanisme de vérification de doublon de courriel
-    addConflictValidation(API.checkConflictURL(), 'Email', 'saveUser');
-    // call back la soumission du formulaire
+  $("#loginCmd").on("click", renderLogin); // call back sur clic
+  initFormValidation();
+  initImageUploaders();
+  $("#abortCmd").on("click", renderLogin); // call back sur clic
+  // ajouter le mécanisme de vérification de doublon de courriel
+  addConflictValidation(API.checkConflictURL(), "Email", "saveUser");
+  // call back la soumission du formulaire
 
-    $("#createProfilForm").on("submit", async function (event) {
-        event.preventDefault();
-        let profil = getFormData($("createProfilForm"));
-        delete profil.matchedPassword;
-        delete profil.matchedEmail;
-        showWaitingGif(); // afficher GIF d’attente
-        let result = await API.register(profil);
-        if (result) {
-            renderLogin(
-                "Votre compte a été créé. Veuillez prendre vos courriels pour récupérer votre code de vérification qui vous sera demandé lors de votre prochaine connexion."
-            );
-        } else {
-            renderLogin("La création du compte a échouée.");
-        }
-    });
+  $("#createProfilForm").on("submit", async function (event) {
+    event.preventDefault();
+    let profil = getFormData($("createProfilForm"));
+    delete profil.matchedPassword;
+    delete profil.matchedEmail;
+    showWaitingGif(); // afficher GIF d’attente
+    let result = await API.register(profil);
+    if (result) {
+      renderLogin(
+        "Votre compte a été créé. Veuillez prendre vos courriels pour récupérer votre code de vérification qui vous sera demandé lors de votre prochaine connexion."
+      );
+    } else {
+      renderLogin("La création du compte a échouée.");
+    }
+  });
 }
 
 function getFormData($form) {
