@@ -118,21 +118,21 @@ function renderLogin(loginMessage = "", user = createNewUser()) {
         `)
     );
 
-    document.getElementById("Email").addEventListener("change", (event) => {
-        user = getFormData($("#loginForm"));
-        let result = API.login(user.Email, user.password);
-        console.log(result);
-        Email = user.Email;
-        Password = user.password;
-        if(API.currentStatus == 481){
-            EmailError = "Courriel introuvable";
-            renderLogin("", user);
-        }
-        else {
-            EmailError = "";
-            renderLogin("", user);
-        }
-      });
+    //document.getElementById("Email").addEventListener("change", (event) => {
+        //user = getFormData($("#loginForm"));
+        //let result = API.login(user.Email, user.password);
+        //console.log(result);
+        //Email = user.Email;
+        //Password = user.password;
+        //if(API.currentStatus == 481){
+           // EmailError = "Courriel introuvable";
+         //   renderLogin("", user);
+        //}
+        //else {
+            //EmailError = "";
+          //  renderLogin("", user);
+        //}
+      //});
 
     $("#loginForm").on("submit", async function (event) {
         event.preventDefault();
