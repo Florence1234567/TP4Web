@@ -5,21 +5,21 @@ let contentScrollPosition = 0;
 
 Init_UI();
 
-function Init_UI(){
+function Init_UI() {
     renderLogin();
-    $("#createProfilCmd").on("click", function() {
+    $("#createProfilCmd").on("click", function () {
         saveContentScrollPosition();
         renderRegister();
     });
 
-    $("#abortCmd").on("click", function() {
+    $("#abortCmd").on("click", function () {
         saveContentScrollPosition();
         eraseContent();
         updateHeader("Connexion");
         renderLogin();
     });
 
-    $("#saveUserCmd").on("click", function() {
+    $("#saveUserCmd").on("click", function () {
         saveContentScrollPosition();
         eraseContent();
         updateHeader("Liste de photo");
@@ -82,18 +82,18 @@ function renderAbout() {
         `))
 }
 
-function renderLogin(loginMessage = ""){
+function renderLogin(loginMessage = "") {
     eraseContent();
     updateHeader("Connexion");
     let EmailError = "Courriel introuvable";
-    let passwordError = "Mot de passe incorecte";
+    let passwordError = "Mot de passe incorrect";
 
     let user = createNewUser();
 
     $("#content").append(
         $(`
-            <h3>${loginMessage}</h3>
             <form class="form" id="loginForm">
+            <h3>${loginMessage}</h3>
                 <input type='email'
                        name='Email'
                        class='form-control'
@@ -120,33 +120,25 @@ function renderLogin(loginMessage = ""){
         `)
     )
 
-    $("#loginForm").on("submit", async function(event) {
+    $("#loginForm").on("submit", async function (event) {
         event.preventDefault();
         let user = getFormData($("#loginForm"));
         showWaitingGif();
         //API saveUser
         //Check siteUI ContactsManager
-        
-        
+
         let result = await API.login(user.Email, user.password);
-        if(result){
+        if (result) {
             renderPhotos();
         }
-        else{
-            renderLogin("Accès non permis. Veuillez vous créer un compte.");
+        else {
+            renderLogin("Compte introuvable");
         }
-        //if(Authorizations.granted(HttpContext.get(), Authorizations.anonymous())){
-         //   renderPhotos();
-        //}
-        //else{
-         //  renderLogin("Accès non permis. Veuillez vous créer un compte.");
-       // }
-            
     })
 }
 
-function createNewUser(){
-    let user = { };
+function createNewUser() {
+    let user = {};
     user.Id = 0;
     user.Email = "";
     user.Password = "";
@@ -157,10 +149,10 @@ function createNewUser(){
         readaccess: 0,
         writeaccess: 0
     }
-    user.VerifyCode = "unverified"; 
-    
+    user.VerifyCode = "unverified";
+
     user.Phone = "";
-    
+
     return user;
 }
 
@@ -256,14 +248,14 @@ function renderRegister() {
         let profil = getFormData($('#createProfilForm'));   
         delete profil.matchedPassword;
         delete profil.matchedEmail;
-    
+
         showWaitingGif(); // afficher GIF d’attente
         let result = await API.register(profil);
 
-        if(result){
+        if (result) {
             renderLogin("Votre compte a été créé. Veuillez prendre vos courriels pour récupérer votre code de vérification qui vous sera demandé lors de votre prochaine connexion.");
         }
-        else{
+        else {
             renderLogin("La création du compte a échouée.");
         } // commander la création au service API
     });
@@ -279,7 +271,7 @@ function getFormData($form) {
     return jsonObject;
 }
 
-function renderPhotos(){
+function renderPhotos() {
     eraseContent();
     updateHeader("Liste des photos");
 
