@@ -2,27 +2,30 @@ let contentScrollPosition = 0;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Views rendering
 
+let EmailError = "";
+let PasswordError = "";
+
+let Email = "";
+let Password = "";
+
+let loggedUser;
 Init_UI();
 
 function Init_UI() {
   renderLogin();
+
   $("#createProfilCmd").on("click", function () {
     saveContentScrollPosition();
-    renderRegister();
-  });
-
-  $("#abortCmd").on("click", function () {
-    saveContentScrollPosition();
     eraseContent();
-    updateHeader("Connexion");
-    renderLogin();
+    updateHeader("Inscription");
+    renderRegister();
   });
 
   $("#saveUserCmd").on("click", function () {
     saveContentScrollPosition();
     eraseContent();
     updateHeader("Liste de photo");
-    renderLogin();
+    renderPhotos();
   });
 }
 function showWaitingGif() {
@@ -46,18 +49,25 @@ function updateHeader(headerName, cmd) {
   $("#header").empty();
   $("#header").append(
     $(`
-            <span title="Connexion" id="ConnexionCmd">
-            <img src="images/PhotoCloudLogo.png" class="appLogo">
-            </span>
-            <span class="viewTitle">${headerName}
-            </span>
-            <div class="headerMenusContainer">
-                <span>&nbsp;</span> <!--filler-->
-            
-                <div class="dropdown ms-auto dropdownLayout">
-                    <!-- Articles de menu -->
-                </div>
-            </div>
+        div id="header">
+          <span title="Liste des photos" id="listPhotosCmd">
+          <img src="images/PhotoCloudLogo.png" class="appLogo">
+           </span>
+          <span class="viewTitle">Liste des photos
+            <div class="cmdIcon fa fa-plus" id="newPhotoCmd" title="Ajouter une photo"></div>
+          </span>
+          <div class="headerMenusContainer">
+          <span>&nbsp;</span> <!--filler-->
+          <i title="Modifier votre profil">
+          <div class="UserAvatarSmall" userid="${loggedUser.Id}" id="editProfilCmd"
+          style="background-image:url('${loggedUser.Avatar}')"
+          title="Nicolas Chourot"></div>
+          </i>
+          <div class="dropdown ms-auto dropdownLayout">
+          <!-- Articles de menu -->
+          </div>
+          </div>
+        </div>
         `)
   );
 }
@@ -82,16 +92,13 @@ function renderAbout() {
                 <p>
                     Collège Lionel-Groulx, automne 2023
                 </p>
-            </div>
-        `)
+            </div>`)
   );
 }
 
 function renderLogin(loginMessage = "") {
   eraseContent();
   updateHeader("Connexion");
-  let EmailError = "";
-  let passwordError = "Mot de passe incorrect";
 
   let user = createNewUser();
 
@@ -107,7 +114,7 @@ function renderLogin(loginMessage = "") {
                        RequireMessage = 'Veuillez entrer votre courriel'
                        InvalidMessage = 'Courriel invalide'
                        placeholder="Adresse de courriel"
-                       value='${user.Email}'>
+                       value='${Email}'>
                 <span style='color:red'>${EmailError}</span>
                 <input type='password'
                         name='password'
@@ -115,8 +122,8 @@ function renderLogin(loginMessage = "") {
                         class="form-control"
                         required
                         RequireMessage = 'Veuillez entrer votre mot de passe'
-                        value='${user.password}'>
-                <span style='color:red'>${passwordError}</span>
+                        value='${user.Password}'>
+                <span style='color:red'>${PasswordError}</span>
                 <input type='submit' name='submit' value="Entrer" class="form-control btn-primary">
             </form>
             <div class="form">
@@ -126,19 +133,20 @@ function renderLogin(loginMessage = "") {
         `)
   );
 
-  document.getElementById("Email").addEventListener("change", (event) => {
-    if (API.currentStatus == 481) {
-      EmailError = "Courriel introuvable";
-      renderLogin("");
-    }
-  });
-
   $("#loginForm").on("submit", async function (event) {
     event.preventDefault();
     let user = getFormData($("#loginForm"));
     showWaitingGif();
-
-    let result = await API.login(user.Email, user.password);
+    Email = user.Email;
+    loggedUser = await API.login(user.Email, user.password);
+    if (API.currentStatus == 481) {
+      EmailError = "Courriel invalide";
+    } else if (API.currentStatus == 482) {
+      PasswordError = "Mot de passe incorrect";
+    } else {
+      EmailError = "";
+      PasswordError = "";
+    }
     if (result) {
       renderPhotos();
     } else {
@@ -253,22 +261,21 @@ function renderRegister() {
   // ajouter le mécanisme de vérification de doublon de courriel
   addConflictValidation(API.checkConflictURL(), "Email", "saveUser");
   // call back la soumission du formulaire
+
   $("#createProfilForm").on("submit", async function (event) {
-    event.preventDefault(); // empêcher le fureteur de soumettre une requête de soumission
-    let profil = getFormData($("#createProfilForm"));
+    event.preventDefault();
+    let profil = getFormData($("createProfilForm"));
     delete profil.matchedPassword;
     delete profil.matchedEmail;
-
     showWaitingGif(); // afficher GIF d’attente
     let result = await API.register(profil);
-
     if (result) {
       renderLogin(
         "Votre compte a été créé. Veuillez prendre vos courriels pour récupérer votre code de vérification qui vous sera demandé lors de votre prochaine connexion."
       );
     } else {
       renderLogin("La création du compte a échouée.");
-    } // commander la création au service API
+    }
   });
 }
 
@@ -285,137 +292,9 @@ function renderPhotos() {
   eraseContent();
   updateHeader("Liste des photos");
 
-  $("#conten").append(
+  $("#content").append(
     $(`
-        
             <h1>TEMP PHOTOS PAGE</h1>
-        
         `)
   );
-}
-
-function initImageUploaders() {
-  $(".imageUploader").each(function () {
-    let id = $(this).attr("id");
-    let controlId = $(this).attr("controlId");
-    let waitingImage = $(this).attr("waitingImage");
-    let newImage = $(this).attr("newImage") == "1";
-    $(this).css("display", "flex");
-    $(this).css("flex-direction", "column");
-    $(this).css("align-items", "center");
-    // $(this).css("border","1px solid lightgray");
-    $(this).css("border-radius", "6px");
-    $(this).css("padding", "6px");
-    $(this).css("padding-bottom", "3px");
-
-    let imageData = $(this).attr("imageSrc");
-    $(this).append(`<img 
-                         id="${controlId}_UploadedImage" 
-                         name="${controlId}_UploadedImage" 
-                         tabindex=0 
-                         class="UploadedImage"
-                         style="width:100%"
-                         src="${imageData}"
-                         title="Cliquez pour sélectionner un fichier, ou cliquer-déposer une image";
-                         waitingImage ="${waitingImage}">`);
-
-    $(this).append(`<input 
-                         id="${controlId}_ImageUploader" 
-                         type="file" style="visibility:hidden;height:0px;margin:0px !important"
-                         accept="${acceptedFileFormat}">`);
-
-    if (newImage) {
-      $(this).append(`<input 
-                            id="${controlId}" 
-                            name="${controlId}" 
-                            required
-                            RequireMessage ="${missingFileErrorMessage}" 
-                            waitingImage ="${waitingImage}">`);
-    } else {
-      $(this).append(`<input 
-                            id="${controlId}" 
-                            name="${controlId}" 
-                            waitingImage ="${waitingImage}">`);
-    }
-
-    $(`#${controlId}_UploadedImage`).on("dragenter", function (e) {
-      $(this).css("border", "2px solid blue");
-    });
-
-    $(`#${controlId}_UploadedImage`).on("dragover", function (e) {
-      $(this).css("border", "2px solid blue");
-      e.preventDefault();
-    });
-
-    $(`#${controlId}_UploadedImage`).on("dragleave", function (e) {
-      $(this).css("border", "2px solid white");
-      e.preventDefault();
-    });
-
-    $(`#${controlId}_UploadedImage`).on("drop", function (e) {
-      var image = e.originalEvent.dataTransfer.files[0];
-      $(this).css("background", "#D8F9D3");
-      e.preventDefault();
-      let id = $(this).attr("id").split("_")[0];
-      let UploadedImage = document.querySelector("#" + id + "_UploadedImage");
-      let waitingImage = UploadedImage.getAttribute("waitingImage");
-      let ImageData = document.querySelector("#" + id);
-      // store the previous uploaded image in case the file selection is aborted
-      UploadedImage.setAttribute("previousImage", UploadedImage.src);
-
-      // set the waiting image
-      if (waitingImage !== "") UploadedImage.src = waitingImage;
-      /* take some delai before starting uploading process in order to let browser to update UploadedImage new source affectation */
-      let t2 = setTimeout(function () {
-        if (UploadedImage !== null) {
-          let len = image.name.length;
-
-          if (len !== 0) {
-            let fname = image.name;
-            //console.log(fname)
-            let ext = fname.split(".").pop().toLowerCase();
-
-            if (!validExtension(ext)) {
-              alert(wrongFileFormatMessage);
-              UploadedImage.src = UploadedImage.getAttribute("previousImage");
-            } else {
-              let fReader = new FileReader();
-              fReader.readAsDataURL(image);
-              fReader.onloadend = () => {
-                UploadedImage.src = fReader.result;
-                ImageData.value = UploadedImage.src;
-                ImageData.setCustomValidity("");
-              };
-            }
-          } else {
-            UploadedImage.src = null;
-          }
-        }
-      }, 30);
-      $(this).css("border", "2px solid white");
-      return true;
-    });
-    ImageUploader_AttachEvent(controlId);
-    let controlIdTop = -$(this).height() / 2;
-    let controlIdLeft = 4;
-    $(`#${controlId}`).css("z-index", "-1");
-    $(`#${controlId}`).css("height", "0px");
-    $(`#${controlId}`).css("width", "0px");
-    $(`#${controlId}`).css("margin", "0px");
-    $(`#${controlId}`).css("position", "relative");
-    $(`#${controlId}`).css("left", `${controlIdLeft}px`);
-    $(`#${controlId}`).css("top", `${controlIdTop}px`);
-  });
-}
-
-function ImageUploader_AttachEvent(controlId) {
-  // one click will be transmitted to #ImageUploader
-  document
-    .querySelector("#" + controlId + "_UploadedImage")
-    .addEventListener("click", () => {
-      document.querySelector("#" + controlId + "_ImageUploader").click();
-    });
-  document
-    .querySelector("#" + controlId + "_ImageUploader")
-    .addEventListener("change", preLoadImage);
 }
