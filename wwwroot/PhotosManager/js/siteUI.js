@@ -2,50 +2,51 @@ let contentScrollPosition = 0;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Views rendering
 
+let EmailError = "";
+let PasswordError = "";
+
+let Email = "";
+let Password = "";
 Init_UI();
 
 function Init_UI() {
-  renderLogin();
-  $("#createProfilCmd").on("click", function () {
-    saveContentScrollPosition();
-    renderRegister();
-  });
-
-  $("#abortCmd").on("click", function () {
-    saveContentScrollPosition();
-    eraseContent();
-    updateHeader("Connexion");
     renderLogin();
-  });
 
-  $("#saveUserCmd").on("click", function () {
-    saveContentScrollPosition();
-    eraseContent();
-    updateHeader("Liste de photo");
-    renderLogin();
-  });
+    $("#createProfilCmd").on("click", function () {
+        saveContentScrollPosition();
+        eraseContent();
+        updateHeader("Inscription");
+        renderRegister();
+    });
+
+    $("#saveUserCmd").on("click", function () {
+        saveContentScrollPosition();
+        eraseContent();
+        updateHeader("Liste de photo");
+        renderPhotos();
+    });
 }
 function showWaitingGif() {
-  eraseContent();
-  $("#content").append(
-    $(
-      "<div class='waitingGifcontainer'><img class='waitingGif' src='images/Loading_icon.gif' /></div>"
-    )
-  );
+    eraseContent();
+    $("#content").append(
+        $(
+            "<div class='waitingGifcontainer'><img class='waitingGif' src='images/Loading_icon.gif' /></div>"
+        )
+    );
 }
 function eraseContent() {
-  $("#content").empty();
+    $("#content").empty();
 }
 function saveContentScrollPosition() {
-  contentScrollPosition = $("#content")[0].scrollTop;
+    contentScrollPosition = $("#content")[0].scrollTop;
 }
 function restoreContentScrollPosition() {
-  $("#content")[0].scrollTop = contentScrollPosition;
+    $("#content")[0].scrollTop = contentScrollPosition;
 }
 function updateHeader(headerName, cmd) {
-  $("#header").empty();
-  $("#header").append(
-    $(`
+    $("#header").empty();
+    $("#header").append(
+        $(`
             <span title="Connexion" id="ConnexionCmd">
             <img src="images/PhotoCloudLogo.png" class="appLogo">
             </span>
@@ -59,16 +60,16 @@ function updateHeader(headerName, cmd) {
                 </div>
             </div>
         `)
-  );
+    );
 }
 function renderAbout() {
-  timeout();
-  saveContentScrollPosition();
-  eraseContent();
-  UpdateHeader("À propos...", "about");
+    timeout();
+    saveContentScrollPosition();
+    eraseContent();
+    UpdateHeader("À propos...", "about");
 
-  $("#content").append(
-    $(`
+    $("#content").append(
+        $(`
             <div class="aboutContainer">
                 <h2>Gestionnaire de photos</h2>
                 <hr>
@@ -84,19 +85,18 @@ function renderAbout() {
                 </p>
             </div>
         `)
-  );
+    );
 }
 
 function renderLogin(loginMessage = "") {
-  eraseContent();
-  updateHeader("Connexion");
-  let EmailError = "";
-  let passwordError = "Mot de passe incorrect";
+    eraseContent();
+    updateHeader("Connexion");
+    let passwordError = "Mot de passe incorrect";
 
-  let user = createNewUser();
+    let user = createNewUser();
 
-  $("#content").append(
-    $(`
+    $("#content").append(
+        $(`
             <form class="form" id="loginForm">
             <h3>${loginMessage}</h3>
                 <input type='email'
@@ -105,8 +105,8 @@ function renderLogin(loginMessage = "") {
                        required
                        RequireMessage = 'Veuillez entrer votre courriel'
                        InvalidMessage = 'Courriel invalide'
-                       placeholder="adresse de courriel"
-                       value='${user.Email}'>
+                       placeholder="Adresse de courriel"
+                       value='${Email}'>
                 <span style='color:red'>${EmailError}</span>
                 <input type='password'
                         name='password'
@@ -114,7 +114,7 @@ function renderLogin(loginMessage = "") {
                         class="form-control"
                         required
                         RequireMessage = 'Veuillez entrer votre mot de passe'
-                        value='${user.password}'>
+                        value='${Password}'>
                 <span style='color:red'>${passwordError}</span>
                 <input type='submit' name='submit' value="Entrer" class="form-control btn-primary">
             </form>
@@ -123,49 +123,54 @@ function renderLogin(loginMessage = "") {
                 <button class="form-control btn-info" id="createProfilCmd">Nouveau Compte</button>
             </div>      
         `)
-    )
+    );
 
     $("#loginForm").on("submit", async function (event) {
         event.preventDefault();
-        let user = getFormData($("#loginForm"));
         showWaitingGif();
         //API saveUser
         //Check siteUI ContactsManager
 
-        let result = await API.login(user.Email, user.password);
+        let result = await API.login(Email, Password);
+        if (API.currentStatus == 481) {
+            EmailError = "Courriel introuvable";
+        }
+        else {
+            EmailError = "";
+        }
         if (result) {
-        renderPhotos();
+            renderPhotos();
         } else {
-        renderLogin("Compte introuvable");
+            renderLogin("Compte introuvable");
         }
     });
 }
 
 function createNewUser() {
-  let user = {};
-  user.Id = 0;
-  user.Email = "";
-  user.Password = "";
-  user.Name = "";
-  user.Avatar = "";
-  user.Created = 1;
-  user.Authorizations = {
-    readaccess: 0,
-    writeaccess: 0,
-  };
-  user.VerifyCode = "unverified";
+    let user = {};
+    user.Id = 0;
+    user.Email = "";
+    user.Password = "";
+    user.Name = "";
+    user.Avatar = "";
+    user.Created = 1;
+    user.Authorizations = {
+        readaccess: 0,
+        writeaccess: 0,
+    };
+    user.VerifyCode = "unverified";
 
-  user.Phone = "";
+    user.Phone = "";
 
-  return user;
+    return user;
 }
 
 function renderRegister() {
-  noTimeout(); // ne pas limiter le temps d’inactivité
-  eraseContent(); // effacer le conteneur #content
-  updateHeader("Inscription"); // mettre à jour l’entête et menu
-  $("#newPhotoCmd").hide(); // camouffler l’icone de commande d’ajout de photo
-  $("#content").append(`
+    noTimeout(); // ne pas limiter le temps d’inactivité
+    eraseContent(); // effacer le conteneur #content
+    updateHeader("Inscription"); // mettre à jour l’entête et menu
+    $("#newPhotoCmd").hide(); // camouffler l’icone de commande d’ajout de photo
+    $("#content").append(`
             <form class="form" id="createProfilForm"'>
                 <fieldset>
                     <legend>Adresse ce courriel</legend>
@@ -247,43 +252,53 @@ function renderRegister() {
     // ajouter le mécanisme de vérification de doublon de courriel
     addConflictValidation(API.checkConflictURL(), 'Email', 'saveUser');
     // call back la soumission du formulaire
-    
+
     $("#createProfilForm").on("submit", async function (event) {
         event.preventDefault();
         let profil = getFormData($("createProfilForm"));
+<<<<<<< HEAD
         delete profil.matchedPassword;
         delete profil.matchedEmail;
         showWaitingGif(); // afficher GIF d’attente
     let result = await API.register(profil);
+=======
+        showWaitingGif();
 
-    if (result) {
-      renderLogin(
-        "Votre compte a été créé. Veuillez prendre vos courriels pour récupérer votre code de vérification qui vous sera demandé lors de votre prochaine connexion."
-      );
-    } else {
-      renderLogin("La création du compte a échouée.");
-    } // commander la création au service API
-  });
+        delete profil.matchedEmail;
+        delete profil.matchedPassword;
+>>>>>>> ee293f9e98867c471d44f4d78ca1afd0713ec1cb
+
+        showWaitingGif(); // afficher GIF d’attente
+        let result = await API.register(profil);
+        console.log(result);
+        if (result) {
+            renderLogin(
+                "Votre compte a été créé. Veuillez prendre vos courriels pour récupérer votre code de vérification qui vous sera demandé lors de votre prochaine connexion."
+            );
+        } else {
+            renderLogin("La création du compte a échouée.");
+        } // commander la création au service API
+    });
 }
 
 function getFormData($form) {
-  const removeTag = new RegExp("(<[a-zA-Z0-9]+>)|(</[a-zA-Z0-9]+>)", "g");
-  var jsonObject = {};
-  $.each($form.serializeArray(), (index, control) => {
-    jsonObject[control.name] = control.value.replace(removeTag, "");
-  });
-  return jsonObject;
+    const removeTag = new RegExp("(<[a-zA-Z0-9]+>)|(</[a-zA-Z0-9]+>)", "g");
+    var jsonObject = {};
+    $.each($form.serializeArray(), (index, control) => {
+        jsonObject[control.name] = control.value.replace(removeTag, "");
+    });
+    return jsonObject;
 }
 
 function renderPhotos() {
-  eraseContent();
-  updateHeader("Liste des photos");
+    eraseContent();
+    updateHeader("Liste des photos");
 
-  $("#conten").append(
-    $(`
+    $("#conten").append(
+        $(`
         
             <h1>TEMP PHOTOS PAGE</h1>
         
         `)
-  );
+    );
 }
