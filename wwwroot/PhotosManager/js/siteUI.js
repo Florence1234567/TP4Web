@@ -1,6 +1,4 @@
-import Authorizations from "../../../authorizations";
-
-
+//import Authorizations from "../../../authorizations";
 
 let contentScrollPosition = 0;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -132,12 +130,12 @@ function renderLogin(loginMessage = ""){
         
 
         API.login(Email, password);
-        if(Authorizations.granted(HttpContext.get(), Authorizations.user())){
-            renderPhotos();
-        }
-        else{
-           renderLogin("Accès non permis. Veuillez vous créer un compte.");
-        }
+        //if(Authorizations.granted(HttpContext.get(), Authorizations.anonymous())){
+         //   renderPhotos();
+        //}
+        //else{
+         //  renderLogin("Accès non permis. Veuillez vous créer un compte.");
+       // }
             
     })
 }

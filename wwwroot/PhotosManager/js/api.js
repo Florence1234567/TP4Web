@@ -2,7 +2,7 @@
 
 //const API_URL = "https://api-server-5.glitch.me/api/contacts";
 //const serverHost = "http://localhost:5000";
-const serverHost = "https://dawn-obvious-bow.glitch.me/api/photos";
+const serverHost = "https://dawn-obvious-bow.glitch.me";
 const photos_API = "/api/photos";
 
 class API {
