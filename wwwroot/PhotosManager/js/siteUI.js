@@ -85,7 +85,7 @@ function renderAbout() {
 function renderLogin(loginMessage = "") {
     eraseContent();
     updateHeader("Connexion");
-    let EmailError = "Courriel introuvable";
+    let EmailError = "";
     let passwordError = "Mot de passe incorrect";
 
     let user = createNewUser();
@@ -96,11 +96,12 @@ function renderLogin(loginMessage = "") {
             <h3>${loginMessage}</h3>
                 <input type='email'
                        name='Email'
+                       id= 'Email'
                        class='form-control'
                        required
                        RequireMessage = 'Veuillez entrer votre courriel'
                        InvalidMessage = 'Courriel invalide'
-                       placeholder="adresse de courriel"
+                       placeholder="Adresse de courriel"
                        value='${user.Email}'>
                 <span style='color:red'>${EmailError}</span>
                 <input type='password'
@@ -118,14 +119,18 @@ function renderLogin(loginMessage = "") {
                 <button class="form-control btn-info" id="createProfilCmd">Nouveau Compte</button>
             </div>      
         `)
-    )
+    );
+
+    document.getElementById("Email").addEventListener("change", (event) => {
+        if(API.currentStatus == 481){
+            EmailError = "Courriel introuvable";
+        }
+      });
 
     $("#loginForm").on("submit", async function (event) {
         event.preventDefault();
         let user = getFormData($("#loginForm"));
         showWaitingGif();
-        //API saveUser
-        //Check siteUI ContactsManager
 
         let result = await API.login(user.Email, user.password);
         if (result) {
