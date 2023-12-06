@@ -47,18 +47,25 @@ function updateHeader(headerName, cmd) {
     $("#header").empty();
     $("#header").append(
         $(`
-            <span title="Connexion" id="ConnexionCmd">
-            <img src="images/PhotoCloudLogo.png" class="appLogo">
-            </span>
-            <span class="viewTitle">${headerName}
-            </span>
-            <div class="headerMenusContainer">
-                <span>&nbsp;</span> <!--filler-->
-            
-                <div class="dropdown ms-auto dropdownLayout">
-                    <!-- Articles de menu -->
-                </div>
-            </div>
+        div id="header">
+        <span title="Liste des photos" id="listPhotosCmd">
+        <img src="images/PhotoCloudLogo.png" class="appLogo">
+         </span>
+        <span class="viewTitle">Liste des photos
+        <div class="cmdIcon fa fa-plus" id="newPhotoCmd" title="Ajouter une photo"></div>
+        </span>
+        <div class="headerMenusContainer">
+        <span>&nbsp;</span> <!--filler-->
+        <i title="Modifier votre profil">
+        <div class="UserAvatarSmall" userid="${loggedUser.Id}" id="editProfilCmd"
+        style="background-image:url('${loggedUser.Avatar}')"
+        title="Nicolas Chourot"></div>
+        </i>
+        <div class="dropdown ms-auto dropdownLayout">
+        <!-- Articles de menu -->
+        </div>
+        </div>
+        </div>
         `)
     );
 }
@@ -90,39 +97,44 @@ function renderLogin(loginMessage = "") {
     eraseContent();
     updateHeader("Connexion");
 
+    let user = createNewUser();
+
     $("#content").append(
-        $(`<div class="content" style="text-align:center">
-            <h3>${loginMessage}</h3>
+        $(`
             <form class="form" id="loginForm">
+            <h3>${loginMessage}</h3>
                 <input type='email'
-                name='Email'
-                class="form-control"
-                required
-                RequireMessage = 'Veuillez entrer votre courriel'
-                InvalidMessage = 'Courriel invalide'
-                placeholder="Adresse courriel"
-                value='${Email}'>
+                       name='Email'
+                       id= 'Email'
+                       class='form-control'
+                       required
+                       RequireMessage = 'Veuillez entrer votre courriel'
+                       InvalidMessage = 'Courriel invalide'
+                       placeholder="Adresse de courriel"
+                       value='${Email}'>
                 <span style='color:red'>${EmailError}</span>
                 <input type='password'
-                name='Password'
-                placeholder='Mot de passe'
-                class="form-control"
-                required
-                RequireMessage = 'Veuillez entrer votre mot de passe'>
+                        name='password'
+                        placeholder='Mot de passe'
+                        class="form-control"
+                        required
+                        RequireMessage = 'Veuillez entrer votre mot de passe'
+                        value='${user.Password}'>
                 <span style='color:red'>${PasswordError}</span>
                 <input type='submit' name='submit' value="Entrer" class="form-control btn-primary">
             </form>
-        <div class="form">
-            <hr>
-            <button class="form-control btn-info" id="createProfilCmd">Nouveau compte</button>
-        </div>
-        </div>`));
+            <div class="form">
+                <hr>
+                <button class="form-control btn-info" id="createProfilCmd">Nouveau Compte</button>
+            </div>      
+        `)
+    );
 
     $("#loginForm").on("submit", async function (event) {
         event.preventDefault();
+        let user = getFormData($("#loginForm"));
         showWaitingGif();
-        let user = createNewUser();
-        user = getFormData($("#loginForm"));
+        Email = user.Email;
         let result = await API.login(user.Email, user.password);
         if (API.currentStatus == 481) {
             EmailError = "Courriel invalide";
@@ -135,42 +147,12 @@ function renderLogin(loginMessage = "") {
             PasswordError = "";
         }
         if (result) {
-            API.storeLoggedUser(user);
             renderPhotos();
-        } else {
+        }
+        else {
             renderLogin("Compte introuvable");
         }
-    });
-}
-
-function reloadLogin(Email) {
-    eraseContent();
-    $("#content").append(
-        $(`<div class="content" style="text-align:center">
-            <form class="form" id="loginForm">
-                <input type='email'
-                name='Email'
-                class="form-control"
-                required
-                RequireMessage = 'Veuillez entrer votre courriel'
-                InvalidMessage = 'Courriel invalide'
-                placeholder="Adresse courriel"
-                value='${Email}'>
-                <span style='color:red'>${EmailError}</span>
-                <input type='password'
-                name='Password'
-                placeholder='Mot de passe'
-                class="form-control"
-                required
-                RequireMessage = 'Veuillez entrer votre mot de passe'>
-                <span style='color:red'>${PasswordError}</span>
-                <input type='submit' name='submit' value="Entrer" class="form-control btn-primary">
-            </form>
-        <div class="form">
-            <hr>
-            <button class="form-control btn-info" id="createProfilCmd">Nouveau compte</button>
-        </div>
-        </div>`));
+    })
 }
 
 function createNewUser() {
@@ -288,7 +270,7 @@ function renderRegister() {
         showWaitingGif(); // afficher GIF d’attente
         let result = await API.register(profil);
         if (result) {
-            renderLogin( 
+            renderLogin(
                 "Votre compte a été créé. Veuillez prendre vos courriels pour récupérer votre code de vérification qui vous sera demandé lors de votre prochaine connexion."
             );
         } else {
