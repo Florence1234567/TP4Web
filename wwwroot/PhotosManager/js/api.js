@@ -68,7 +68,7 @@ class API {
             });
         });
     }
-    static register(profil) {
+    static register(profil) { 
         API.initHttpState();
         return new Promise(resolve => {
             $.ajax({
