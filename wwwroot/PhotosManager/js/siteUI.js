@@ -500,7 +500,7 @@ function renderPhotos() {
 function sendVerificationEmail(){
   let html = `
                 Bonjour ${API.retrieveLoggedUser().Name}, <br /> <br />
-                Voici votre code pour confirmer votre adresse de courriel
+                Voici votre code pour confirmer votre adresse courriel.
                 <br />
                 <h3>${API.retrieveLoggedUser().VerifyCode}</h3>
             `;
