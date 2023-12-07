@@ -8,13 +8,15 @@ let PasswordError = "";
 let Email = "";
 let Password = "";
 
-let loggedUser = false;
+let result = false;
+
+let loggedUser;
 Init_UI();
 
 function Init_UI() {
     renderLogin();
     $("#newPhotoCmd").hide();
-    
+
     $("#createProfilCmd").on("click", function () {
         eraseContent();
         renderRegister();
@@ -55,7 +57,7 @@ function updateHeader(headerName) {
         </span>
         `));
 
-    if (loggedUser) {
+    if (result) {
         $("#header").append(
             $(`
             <div class="headerMenusContainer">
@@ -197,7 +199,7 @@ function renderLogin(loginMessage = "") {
         let user = getFormData($("#loginForm"));
         showWaitingGif();
         Email = user.Email;
-        loggedUser = await API.login(user.Email, user.password);
+        result = await API.login(user.Email, user.password);
         if (API.currentStatus == 481) {
             EmailError = "Courriel invalide";
             PasswordError = "";
@@ -210,8 +212,9 @@ function renderLogin(loginMessage = "") {
             EmailError = "";
             PasswordError = "";
         }
-        if (loggedUser) {
-            if (API.retrieveLoggedUser().VerifyCode === "verified") {
+        if (result) {
+            loggedUser = API.retrieveLoggedUser();
+            if (loggedUser.VerifyCode === "verified") {
                 renderPhotos();
             }
             else {
@@ -331,7 +334,6 @@ function renderRegister() {
         event.preventDefault();// empêcher le fureteur de soumettre une requête de soumission
         showWaitingGif(); // afficher GIF d’attente
         createProfil(profil); // commander la création au service API
-
     });
 }
 
@@ -359,6 +361,7 @@ function getFormData($form) {
 function renderModify() {
     eraseContent();
     updateHeader("Modification du profil");
+    $("#newPhotoCmd").hide();
 
     $("#content").append(`
     <form class="form" id="editProfilForm"'>
@@ -425,7 +428,7 @@ function renderModify() {
                     </fieldset>
                     <input type='submit'
                         name='submit'
-                        id='saveUserCmd'
+                        id='modifyUserCmd'
                         value="Enregistrer"
                         class="form-control btn-primary">
                     </form>
@@ -433,10 +436,27 @@ function renderModify() {
                         <button class="form-control btn-secondary" id="abortCmd">Annuler</button>
                     </div>
                     <div class="cancel"> <hr>
-                        <a href="confirmDeleteProfil.php">
-                            <button class="form-control btn-warning">Effacer le compte</button>
-                        </a
+                        <button class="form-control btn-warning" id="deleteCmd">Effacer le compte</button>
+                    </div>
     `)
+
+    $('#editProfilForm').on("submit", async function (event) {
+        loggedUser = getFormData($('#editProfilForm'));
+        delete profil.matchedPassword;
+        delete profil.matchedEmail;
+        event.preventDefault();// empêcher le fureteur de soumettre une requête de soumission
+        showWaitingGif(); // afficher GIF d’attente
+        let result = await API.modifyUserProfil(profil);
+        if (result) {
+            renderPhotos();
+        } else {
+            renderModify();
+        }
+    });
+
+    $('#abortCmd').on("click", function (event) {
+            renderPhotos();
+    });
 }
 
 function renderAccountVerif() {
@@ -458,7 +478,7 @@ function renderAccountVerif() {
         InvalidMessage = 'Code de vérification invalide'/>
         <input type='submit' name='submit' id='verifCodeCmd' value="Vérifier" class="form-control btn-primary">  
     </form>
-    <button class="form-control btn-secondary" id="resendCmd">Renvoyer le code</button>
+    <input type='submit' name='submit' id='resendCmd' value="Envoyer le code de nouveau" class="form-control btn-primary">
   `)
 
     $('#validateProfileForm').on("submit", function (event) {
@@ -487,7 +507,7 @@ function renderPhotos() {
     );
 }
 
-function sendVerificationEmail() {
+/*function sendVerificationEmail() {
     let html = `
                 Bonjour ${API.retrieveLoggedUser().Name}, <br /> <br />
                 Voici votre code pour confirmer votre adresse courriel.
@@ -496,4 +516,4 @@ function sendVerificationEmail() {
             `;
     const gmail = new Gmail();
     gmail.send(API.retrieveLoggedUser().Email, 'Vérification de courriel...', html);
-}
+}*/
