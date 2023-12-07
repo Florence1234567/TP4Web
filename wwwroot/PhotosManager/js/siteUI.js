@@ -1,3 +1,4 @@
+
 let contentScrollPosition = 0;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Views rendering
@@ -252,83 +253,75 @@ function createNewUser() {
 }
 
 function renderRegister() {
-    noTimeout(); // ne pas limiter le temps d’inactivité
-    eraseContent(); // effacer le conteneur #content
-    updateHeader("Inscription"); // mettre à jour l’entête et menu
-    $("#newPhotoCmd").hide(); // camouffler l’icone de commande d’ajout de photo
-    $("#content").append(`
-            <form class="form" id="createProfilForm"'>
-                <fieldset>
-                    <legend>Adresse ce courriel</legend>
-                    <input type="email"
-                    class="form-control Email"
-                    name="Email"
-                    id="Email"
-                    placeholder="Courriel"
-                    required
-                    RequireMessage = 'Veuillez entrer votre courriel'
-                    InvalidMessage = 'Courriel invalide'
-                    CustomErrorMessage ="Ce courriel est déjà utilisé"/>
-
-
-                    <input class="form-control MatchedInput"
-                    type="text"
-                    matchedInputId="Email"
-                    name="matchedEmail"
-                    id="matchedEmail"
-                    placeholder="Vérification"
-                    required
-                    RequireMessage = 'Veuillez entrez de nouveau votre courriel'
-                    InvalidMessage="Les courriels ne correspondent pas" />
-                </fieldset>
-
-                <fieldset>
-                <legend>Mot de passe</legend>
-                    <input type="password"
-                    class="form-control"
-                    name="Password"
-                    id="Password"
-                    placeholder="Mot de passe"
-                    required
-                    RequireMessage = 'Veuillez entrer un mot de passe'
-                    InvalidMessage = 'Mot de passe trop court'/>
-                
-                    <input class="form-control MatchedInput"
-                    type="password"
-                    matchedInputId="Password"
-                    name="matchedPassword"
-                    id="matchedPassword"
-                    placeholder="Vérification" required
-                    InvalidMessage="Ne correspond pas au mot de passe" />
-
-                </fieldset>
-                <fieldset>
-                <legend>Nom</legend>
-                    <input type="text"
-                    class="form-control Alpha"
-                    name="Name"
-                    id="Name"
-                    placeholder="Nom"
-                    required
-                    RequireMessage = 'Veuillez entrer votre nom'
-                    InvalidMessage = 'Nom invalide'/>
-                </fieldset>
-
-                <fieldset>
-                <legend>Avatar</legend>
-                    <div class='imageUploader'
-                        newImage='true'
-                        controlId='Avatar'
-                        imageSrc='images/no-avatar.png'
-                        waitingImage="images/Loading_icon.gif">
-                    </div>
-                </fieldset>
-                <input type='submit' name='submit' id='saveUserCmd' value="Enregistrer" class="form-control btn-primary">
-        </form>
-
-        <div class="cancel">
-        <button class="form-control btn-secondary" id="abortCmd">Annuler</button>
-        </div>
+  noTimeout(); // ne pas limiter le temps d’inactivité
+  eraseContent(); // effacer le conteneur #content
+  updateHeader("Inscription"); // mettre à jour l’entête et menu
+  $("#newPhotoCmd").hide(); // camouffler l’icone de commande d’ajout de photo
+  $("#content").append(`
+  <form class="form" id="createProfilForm"'>
+  <fieldset>
+  <legend>Adresse ce courriel</legend>
+  <input type="email"
+  class="form-control Email"
+  name="Email"
+  id="Email"
+  placeholder="Courriel"
+  required
+  RequireMessage = 'Veuillez entrer votre courriel'
+  InvalidMessage = 'Courriel invalide'
+  CustomErrorMessage ="Ce courriel est déjà utilisé"/>
+  <input class="form-control MatchedInput"
+  type="text"
+  matchedInputId="Email"
+  name="matchedEmail"
+  id="matchedEmail"
+  placeholder="Vérification"
+  required
+  RequireMessage = 'Veuillez entrez de nouveau votre courriel'
+  InvalidMessage="Les courriels ne correspondent pas" />
+  </fieldset>
+  <fieldset>
+  <legend>Mot de passe</legend>
+  <input type="password"
+  class="form-control"
+  name="Password"
+  id="Password"
+  placeholder="Mot de passe"
+  required
+  RequireMessage = 'Veuillez entrer un mot de passe'
+  InvalidMessage = 'Mot de passe trop court'/>
+  <input class="form-control MatchedInput"
+  type="password"
+  matchedInputId="Password"
+  name="matchedPassword"
+  id="matchedPassword"
+  placeholder="Vérification" required
+  InvalidMessage="Ne correspond pas au mot de passe" />
+  </fieldset>
+  <fieldset>
+  <legend>Nom</legend>
+  <input type="text"
+  class="form-control Alpha"
+  name="Name"
+  id="Name"
+  placeholder="Nom"
+  required
+  RequireMessage = 'Veuillez entrer votre nom'
+  InvalidMessage = 'Nom invalide'/>
+  </fieldset>
+  <fieldset>
+  <legend>Avatar</legend>
+  <div class='imageUploader'
+  newImage='true'
+  controlId='Avatar'
+  imageSrc='images/no-avatar.png'
+  waitingImage="images/Loading_icon.gif">
+  </div>
+  </fieldset>
+  <input type='submit' name='submit' id='saveUserCmd' value="Enregistrer" class="form-control btn-primary">
+  </form>
+  <div class="cancel">
+  <button class="form-control btn-secondary" id="abortCmd">Annuler</button>
     `);
 
     $("#loginCmd").on("click", renderLogin); // call back sur clic
@@ -336,24 +329,40 @@ function renderRegister() {
     initImageUploaders();
     $("#abortCmd").on("click", renderLogin); // call back sur clic
     // ajouter le mécanisme de vérification de doublon de courriel
-    addConflictValidation(API.checkConflictURL(), "Email", "saveUser");
-    // call back la soumission du formulaire
+    addConflictValidation(API.checkConflictURL(), 'Email', 'saveUser');
 
-    $("#createProfilForm").on("submit", async function (event) {
-        event.preventDefault();
-        let profil = getFormData($("createProfilForm"));
+    // call back la soumission du formulaire
+    
+    $('#createProfilForm').on("submit", function (event) {
+        let profil = getFormData($('#createProfilForm'));
         delete profil.matchedPassword;
         delete profil.matchedEmail;
+        event.preventDefault();// empêcher le fureteur de soumettre une requête de soumission
         showWaitingGif(); // afficher GIF d’attente
-        let result = await API.register(profil);
-        if (result) {
-            renderLogin(
-                "Votre compte a été créé. Veuillez prendre vos courriels pour récupérer votre code de vérification qui vous sera demandé lors de votre prochaine connexion."
-            );
-        } else {
-            renderLogin("La création du compte a échouée.");
-        }
+        createProfil(profil); // commander la création au service API
+        
     });
+}
+
+function createProfil(profil){
+    let result = API.register(profil);
+    if (result) {
+        renderLogin(
+          "Votre compte a été créé. Veuillez prendre vos courriels pour récupérer votre code de vérification qui vous sera demandé lors de votre prochaine connexion."
+        );
+      } else {
+        renderLogin("La création du compte a échouée.");
+      }
+}
+
+function getFormData($form) {
+  const removeTag = new RegExp("(<[a-zA-Z0-9]+>)|(</[a-zA-Z0-9]+>)", "g");
+  var jsonObject = {};
+  console.log($form.serializeArray());
+  $.each($form.serializeArray(), (index, control) => {
+    jsonObject[control.name] = control.value.replace(removeTag, "");
+  });
+  return jsonObject;
 }
 
 function renderModify() {
@@ -440,13 +449,41 @@ function renderModify() {
     `)
 }
 
-function getFormData($form) {
-    const removeTag = new RegExp("(<[a-zA-Z0-9]+>)|(</[a-zA-Z0-9]+>)", "g");
-    var jsonObject = {};
-    $.each($form.serializeArray(), (index, control) => {
-        jsonObject[control.name] = control.value.replace(removeTag, "");
-    });
-    return jsonObject;
+function renderAccountVerif(){
+  noTimeout(); // ne pas limiter le temps d’inactivité
+  eraseContent(); // effacer le conteneur #content
+  updateHeader("Verification"); // mettre à jour l’entête et menu
+  console.log(API.retrieveLoggedUser().VerifyCode);
+  //sendVerificationEmail();
+  $("#content").append(`
+    <h3>Veuillez entrer le code de vérification que vous avez reçu par courriel</h3>
+    <form class="form" id="validateProfileForm"'>
+        <input type="text"
+        class="form-control Alpha"
+        name="VerificationCode"
+        id="VerificationCode"
+        placeholder="Code de vérification de courriel"
+        required
+        RequireMessage = 'Veuillez entrer un code de vérification'
+        InvalidMessage = 'Code de vérification invalide'/>
+        <input type='submit' name='submit' id='verifCodeCmd' value="Vérifier" class="form-control btn-primary">  
+    </form>
+    <button class="form-control btn-secondary" id="resendCmd">Renvoyer le code</button>
+  `)
+
+  $('#validateProfileForm').on("submit", function (event) {
+    let code = getFormData($('#validateProfileForm'));
+    event.preventDefault();// empêcher le fureteur de soumettre une requête de soumission
+    showWaitingGif(); // afficher GIF d’attente
+    
+    if(API.verifyEmail(API.retrieveLoggedUser().Id, code.serializeArray()[0])){
+      renderPhotos();
+    }
+    else{
+      renderAccountVerif();
+    }
+    
+});
 }
 
 function renderPhotos() {
@@ -458,4 +495,15 @@ function renderPhotos() {
             <h1>TEMP PHOTOS PAGE</h1>
         `)
     );
+}
+
+function sendVerificationEmail(){
+  let html = `
+                Bonjour ${API.retrieveLoggedUser().Name}, <br /> <br />
+                Voici votre code pour confirmer votre adresse de courriel
+                <br />
+                <h3>${API.retrieveLoggedUser().VerifyCode}</h3>
+            `;
+        const gmail = new Gmail();
+        gmail.send(API.retrieveLoggedUser().Email, 'Vérification de courriel...', html);
 }
