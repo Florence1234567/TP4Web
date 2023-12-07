@@ -471,7 +471,7 @@ function renderAccountVerif() {
     <h3>Veuillez entrer le code de vérification que vous avez reçu par courriel</h3>
     <form class="form" id="validateProfileForm"'>
         <input type="text"
-        class="form-control Alpha"
+        class="form-control" required
         name="VerificationCode"
         id="VerificationCode"
         placeholder="Code de vérification de courriel"
@@ -485,6 +485,7 @@ function renderAccountVerif() {
     $('#validateProfileForm').on("submit", async function (event) {
         event.preventDefault();// empêcher le fureteur de soumettre une requête de soumission
         let code = getFormData($('#validateProfileForm'));
+        let currUser = API.retrieveLoggedUser();
         showWaitingGif(); // afficher GIF d’attente
 
         console.log(code);
@@ -492,13 +493,18 @@ function renderAccountVerif() {
         let result = await API.verifyEmail(API.retrieveLoggedUser().Id, Object.values(code)[0])
 
         if (result && API.currentStatus !== 480) {
-            let curUser = API.retrieveLoggedUser();
-            delete curUser.Password;
-            let verified = { VerifyCode: "verified" };
-            let modified = await API.modifyUserProfil({ ...curUser, ...verified });
-            if(modified){
+            
+            API.eraseLoggedUser();
+            currUser.VerifyCode = "verified";
+            API.storeLoggedUser(currUser);
+            let modified = await API.modifyUserProfil(API.retrieveLoggedUser());
+
+            if(modified && API.currentStatus !== 480){
                 renderPhotos();
-            } 
+            }
+            else{
+                renderAccountVerif();
+            }
         }
         else {
             renderAccountVerif();
