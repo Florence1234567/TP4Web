@@ -65,20 +65,6 @@ function updateHeader(headerName) {
             style="background-image:url('${loggedUser.Avatar}')"
             title="${loggedUser.Name}"></div>
             </i>
-            
-            </div>
-            </div>
-            `));
-
-        $("#editProfilCmd").on("click", function () {
-            renderModify();
-        });
-    }
-}
-
-function renderDropDown() {
-    $("#header").append(
-        $(`
             <div class="dropdown ms-auto dropdownLayout">
             <div data-bs-toggle="dropdown" aria-expanded="false">
             <i class="cmdIcon fa fa-ellipsis-vertical"></i>
@@ -128,8 +114,25 @@ function renderDropDown() {
             <i class="menuIcon fa fa-info-circle mx-2"></i>
             À propos...
             </span>
-            </div>`));
+            </div>
+                </div>
+                </div>
+                `));
+
+        $("#editProfilCmd").on("click", function () {
+            renderModify();
+        });
+
+        $("#logoutCmd").on("click", function () {
+            API.logout();
+            Email = "";
+            loggedUser = "";
+            result = false;
+            renderLogin();
+        })
+    }
 }
+
 function renderAbout() {
     timeout();
     saveContentScrollPosition();
@@ -221,7 +224,12 @@ function renderLogin(loginMessage = "") {
         else {
             renderLogin("Compte introuvable");
         }
-    })
+    });
+
+    $("#createProfilCmd").on("click", function () {
+        eraseContent();
+        renderRegister();
+    });
 }
 
 function createNewUser() {
@@ -315,10 +323,14 @@ function renderRegister() {
   <button class="form-control btn-secondary" id="abortCmd">Annuler</button>
     `);
 
-    $("#loginCmd").on("click", renderLogin); // call back sur clic
+    $("#loginCmd").on("click", function() {
+        renderLogin();
+    }); // call back sur clic
     initFormValidation();
     initImageUploaders();
-    $("#abortCmd").on("click", renderLogin); // call back sur clic
+    $("#abortCmd").on("click", function() {
+        renderLogin();
+    }); // call back sur clic
     // ajouter le mécanisme de vérification de doublon de courriel
     addConflictValidation(API.checkConflictURL(), 'Email', 'saveUser');
 
@@ -358,6 +370,9 @@ function getFormData($form) {
 function renderModify() {
     eraseContent();
     updateHeader("Modification du profil");
+
+    initFormValidation();
+    initImageUploaders();
 
     $("#content").append(`
     <form class="form" id="editProfilForm"'>
@@ -436,6 +451,24 @@ function renderModify() {
                             <button class="form-control btn-warning">Effacer le compte</button>
                         </a
     `)
+
+    $('#editProfilForm').on("submit", async function (event) {
+        loggedUser = getFormData($('#editProfilForm'));
+        delete profil.matchedPassword;
+        delete profil.matchedEmail;
+        event.preventDefault();// empêcher le fureteur de soumettre une requête de soumission
+        showWaitingGif(); // afficher GIF d’attente
+        let result = await API.modifyUserProfil(profil);
+        if (result) {
+            renderPhotos();
+        } else {
+            renderModify();
+        }
+    });
+
+    $('#abortCmd').on("click", function (event) {
+        renderPhotos();
+    });
 }
 
 function renderAccountVerif() {
@@ -497,4 +530,15 @@ function renderPhotos() {
             <h1>TEMP PHOTOS PAGE</h1>
         `)
     );
+}
+
+function sendVerificationEmail() {
+    let html = `
+                Bonjour ${API.retrieveLoggedUser().Name}, <br /> <br />
+                Voici votre code pour confirmer votre adresse courriel.
+                <br />
+                <h3>${API.retrieveLoggedUser().VerifyCode}</h3>
+            `;
+    const gmail = new Gmail();
+    gmail.send(API.retrieveLoggedUser().Email, 'Vérification de courriel...', html);
 }
