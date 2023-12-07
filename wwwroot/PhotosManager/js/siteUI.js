@@ -15,7 +15,7 @@ Init_UI();
 function Init_UI() {
     renderLogin();
     $("#newPhotoCmd").hide();
-    
+
     $("#createProfilCmd").on("click", function () {
         eraseContent();
         renderRegister();
@@ -120,6 +120,11 @@ function updateHeader(headerName) {
                 </div>
                 `));
 
+                let result = API.GetAccounts()
+        if(API.currentStatus == 401){
+            $("#manageUserCm").hide();
+        }
+
         $("#editProfilCmd").on("click", function () {
             renderModify();
         });
@@ -197,6 +202,7 @@ function renderLogin(loginMessage = "") {
     );
 
     $("#loginForm").on("submit", async function (event) {
+        console.log(API.GetAccounts());
         event.preventDefault();
         let user = getFormData($("#loginForm"));
         showWaitingGif();
@@ -215,7 +221,7 @@ function renderLogin(loginMessage = "") {
             PasswordError = "";
         }
         if (result) {
-            loggedUser =API.retrieveLoggedUser();
+            loggedUser = API.retrieveLoggedUser();
             if (loggedUser.VerifyCode === "verified") {
                 renderPhotos();
             }
@@ -325,12 +331,12 @@ function renderRegister() {
   <button class="form-control btn-secondary" id="abortCmd">Annuler</button>
     `);
 
-    $("#loginCmd").on("click", function() {
+    $("#loginCmd").on("click", function () {
         renderLogin();
     }); // call back sur clic
     initFormValidation();
     initImageUploaders();
-    $("#abortCmd").on("click", function() {
+    $("#abortCmd").on("click", function () {
         renderLogin();
     }); // call back sur clic
     // ajouter le mécanisme de vérification de doublon de courriel
@@ -449,9 +455,9 @@ function renderModify() {
                         <button class="form-control btn-secondary" id="abortCmd">Annuler</button>
                     </div>
                     <div class="cancel"> <hr>
-                        <a href="confirmDeleteProfil.php">
-                            <button class="form-control btn-warning">Effacer le compte</button>
-                        </a
+                            <button class="form-control btn-warning" id="deleteAccountCmd">Effacer le compte</button>
+                            </div>
+
     `)
 
     $('#editProfilForm').on("submit", async function (event) {
@@ -470,6 +476,41 @@ function renderModify() {
 
     $('#abortCmd').on("click", function (event) {
         renderPhotos();
+    });
+
+    $('#deleteAccountCmd').on("click", function (event) {
+        renderRemoveAccount();
+    });
+}
+
+function renderRemoveAccount() {
+    eraseContent();
+    updateHeader("Retrait de compte");
+
+    $("#content").append(`
+    <div class="viewTitle" style="text-align: center">Voulez-vous vraiment effacer votre compte?</div> 
+    <form class="UserdeleteForm">
+        <input  type='submit' name='submit' value="Effacer mon compte" class="form-control btn-danger UserdeleteForm">
+    </form>
+    <div class="UserdeleteForm">
+        <button class="form-control btn-secondary" id="abortCmd">Annuler</button>
+    </div>
+    `);
+
+    $('#UserDeleteForm').on("submit", async function (event) {
+        showWaitingGif(); // afficher GIF d’attente
+        let result = await API.unsubscribeAccount(loggedUser);
+        if (result) {
+            API.logout();
+            Email = "";
+            loggedUser = "";
+            result = false;
+            renderLogin();
+        }
+    });
+
+    $('#abortCmd').on("click", function (event) {
+        renderModify();
     });
 }
 
@@ -494,25 +535,25 @@ function renderAccountVerif() {
 
     $('#validateProfileForm').on("submit", async function (event) {
         event.preventDefault();// empêcher le fureteur de soumettre une requête de soumission
-        let code = getFormData($('#validateProfileForm'));
+        let code = $("#VerificationCode").val();
         let currUser = API.retrieveLoggedUser();
         showWaitingGif(); // afficher GIF d’attente
 
         console.log(code);
         console.log(API.retrieveLoggedUser());
-        let result = await API.verifyEmail(API.retrieveLoggedUser().Id, Object.values(code)[0])
+        let result = await API.verifyEmail(API.retrieveLoggedUser().Id, code)
 
         if (result && API.currentStatus !== 480) {
-            
+
             API.eraseLoggedUser();
             currUser.VerifyCode = "verified";
             API.storeLoggedUser(currUser);
             let modified = await API.modifyUserProfil(API.retrieveLoggedUser());
 
-            if(modified && API.currentStatus !== 480){
+            if (modified && API.currentStatus !== 480) {
                 renderPhotos();
             }
-            else{
+            else {
                 renderAccountVerif();
             }
         }
