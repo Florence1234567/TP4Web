@@ -8,6 +8,7 @@ let PasswordError = "";
 let Email = "";
 let Password = "";
 
+let result = "";
 let loggedUser = false;
 Init_UI();
 
@@ -200,7 +201,7 @@ function renderLogin(loginMessage = "") {
         let user = getFormData($("#loginForm"));
         showWaitingGif();
         Email = user.Email;
-        loggedUser = await API.login(user.Email, user.password);
+        result = await API.login(user.Email, user.password);
         if (API.currentStatus == 481) {
             EmailError = "Courriel invalide";
             PasswordError = "";
@@ -213,8 +214,9 @@ function renderLogin(loginMessage = "") {
             EmailError = "";
             PasswordError = "";
         }
-        if (loggedUser) {
-            if (API.retrieveLoggedUser().VerifyCode === "verified") {
+        if (result) {
+            loggedUser =API.retrieveLoggedUser();
+            if (loggedUser.VerifyCode === "verified") {
                 renderPhotos();
             }
             else {
