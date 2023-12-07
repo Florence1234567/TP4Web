@@ -353,7 +353,6 @@ function createProfil(profil) {
 function getFormData($form) {
     const removeTag = new RegExp("(<[a-zA-Z0-9]+>)|(</[a-zA-Z0-9]+>)", "g");
     var jsonObject = {};
-    console.log($form.serializeArray());
     $.each($form.serializeArray(), (index, control) => {
         jsonObject[control.name] = control.value.replace(removeTag, "");
     });
@@ -468,8 +467,6 @@ function renderAccountVerif() {
     noTimeout(); // ne pas limiter le temps d’inactivité
     eraseContent(); // effacer le conteneur #content
     updateHeader("Vérification"); // mettre à jour l’entête et menu
-    console.log(API.retrieveLoggedUser().VerifyCode);
-    //sendVerificationEmail();
     $("#content").append(`
     <h3>Veuillez entrer le code de vérification que vous avez reçu par courriel</h3>
     <form class="form" id="validateProfileForm"'>
@@ -483,16 +480,25 @@ function renderAccountVerif() {
         InvalidMessage = 'Code de vérification invalide'/>
         <input type='submit' name='submit' id='verifCodeCmd' value="Vérifier" class="form-control btn-primary">  
     </form>
-    <input type='submit' name='submit' id='resendCmd' value="Envoyer le code de nouveau" class="form-control btn-primary">
   `)
 
-    $('#validateProfileForm').on("submit", function (event) {
-        let code = getFormData($('#validateProfileForm'));
+    $('#validateProfileForm').on("submit", async function (event) {
         event.preventDefault();// empêcher le fureteur de soumettre une requête de soumission
+        let code = getFormData($('#validateProfileForm'));
         showWaitingGif(); // afficher GIF d’attente
 
-        if (API.verifyEmail(API.retrieveLoggedUser().Id, code.serializeArray()[0])) {
-            renderPhotos();
+        console.log(code);
+        console.log(API.retrieveLoggedUser());
+        let result = await API.verifyEmail(API.retrieveLoggedUser().Id, Object.values(code)[0])
+
+        if (result && API.currentStatus !== 480) {
+            let curUser = API.retrieveLoggedUser();
+            delete curUser.Password;
+            let verified = { VerifyCode: "verified" };
+            let modified = await API.modifyUserProfil({ ...curUser, ...verified });
+            if(modified){
+                renderPhotos();
+            } 
         }
         else {
             renderAccountVerif();
