@@ -1,3 +1,4 @@
+
 let contentScrollPosition = 0;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Views rendering
@@ -134,7 +135,12 @@ function renderLogin(loginMessage = "") {
 
         let result = await API.login(user.Email, user.password);
         if (result) {
+          if(API.retrieveLoggedUser().VerifyCode === "verified"){
             renderPhotos();
+          }
+          else{
+            renderAccountVerif();
+          }  
         } 
         else 
         {
@@ -261,6 +267,7 @@ function renderRegister() {
         event.preventDefault();// empêcher le fureteur de soumettre une requête de soumission
         showWaitingGif(); // afficher GIF d’attente
         createProfil(profil); // commander la création au service API
+        
     });
 }
 
@@ -285,6 +292,43 @@ function getFormData($form) {
   return jsonObject;
 }
 
+function renderAccountVerif(){
+  noTimeout(); // ne pas limiter le temps d’inactivité
+  eraseContent(); // effacer le conteneur #content
+  updateHeader("Verification"); // mettre à jour l’entête et menu
+  console.log(API.retrieveLoggedUser().VerifyCode);
+  //sendVerificationEmail();
+  $("#content").append(`
+    <h3>Veuillez entrer le code de vérification que vous avez reçu par courriel</h3>
+    <form class="form" id="validateProfileForm"'>
+        <input type="text"
+        class="form-control Alpha"
+        name="VerificationCode"
+        id="VerificationCode"
+        placeholder="Code de vérification de courriel"
+        required
+        RequireMessage = 'Veuillez entrer un code de vérification'
+        InvalidMessage = 'Code de vérification invalide'/>
+        <input type='submit' name='submit' id='verifCodeCmd' value="Vérifier" class="form-control btn-primary">  
+    </form>
+    <button class="form-control btn-secondary" id="resendCmd">Renvoyer le code</button>
+  `)
+
+  $('#validateProfileForm').on("submit", function (event) {
+    let code = getFormData($('#validateProfileForm'));
+    event.preventDefault();// empêcher le fureteur de soumettre une requête de soumission
+    showWaitingGif(); // afficher GIF d’attente
+    
+    if(API.verifyEmail(API.retrieveLoggedUser().Id, code.serializeArray()[0])){
+      renderPhotos();
+    }
+    else{
+      renderAccountVerif();
+    }
+    
+});
+}
+
 function renderPhotos() {
   eraseContent();
   updateHeader("Liste des photos");
@@ -296,4 +340,15 @@ function renderPhotos() {
         
         `)
   );
+}
+
+function sendVerificationEmail(){
+  let html = `
+                Bonjour ${API.retrieveLoggedUser().Name}, <br /> <br />
+                Voici votre code pour confirmer votre adresse de courriel
+                <br />
+                <h3>${API.retrieveLoggedUser().VerifyCode}</h3>
+            `;
+        const gmail = new Gmail();
+        gmail.send(API.retrieveLoggedUser().Email, 'Vérification de courriel...', html);
 }
