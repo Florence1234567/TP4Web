@@ -10,12 +10,12 @@ let Email = "";
 let Password = "";
 
 let loggedUser = false;
-let isModifying = false;
 Init_UI();
 
 function Init_UI() {
     renderLogin();
-
+    $("#newPhotoCmd").hide();
+    
     $("#createProfilCmd").on("click", function () {
         eraseContent();
         renderRegister();
@@ -47,29 +47,16 @@ function restoreContentScrollPosition() {
 function updateHeader(headerName) {
     $("#header").empty();
 
-    if (loggedUser && !isModifying) {
-        $("#header").append(
-            $(`
-                <span title="${headerName}" id="HeaderCmd">
-                <img src="images/PhotoCloudLogo.png" class="appLogo">
-                </span>
-                <span class="viewTitle">${headerName}
-                    <div class="cmdIcon fa fa-plus" id="newPhotoCmd" title="Ajouter une photo"></div>
-                </span>
-            `));
-    }
-    else{
-        $("#header").append(
-            $(`
+    $("#header").append(
+        $(`
         <span title="${headerName}" id="HeaderCmd">
         <img src="images/PhotoCloudLogo.png" class="appLogo">
         </span>
         <span class="viewTitle">${headerName}
         </span>
         `));
-    }
-    
-    if(loggedUser) {
+
+    if (loggedUser) {
         $("#header").append(
             $(`
             <div class="headerMenusContainer">
@@ -225,7 +212,12 @@ function renderLogin(loginMessage = "") {
             PasswordError = "";
         }
         if (loggedUser) {
-            renderPhotos();
+            if (API.retrieveLoggedUser().VerifyCode === "verified") {
+                renderPhotos();
+            }
+            else {
+                renderAccountVerif();
+            }
         }
         else {
             renderLogin("Compte introuvable");
@@ -253,11 +245,11 @@ function createNewUser() {
 }
 
 function renderRegister() {
-  noTimeout(); // ne pas limiter le temps d’inactivité
-  eraseContent(); // effacer le conteneur #content
-  updateHeader("Inscription"); // mettre à jour l’entête et menu
-  $("#newPhotoCmd").hide(); // camouffler l’icone de commande d’ajout de photo
-  $("#content").append(`
+    noTimeout(); // ne pas limiter le temps d’inactivité
+    eraseContent(); // effacer le conteneur #content
+    updateHeader("Inscription"); // mettre à jour l’entête et menu
+    $("#newPhotoCmd").hide(); // camouffler l’icone de commande d’ajout de photo
+    $("#content").append(`
   <form class="form" id="createProfilForm"'>
   <fieldset>
   <legend>Adresse ce courriel</legend>
@@ -332,7 +324,7 @@ function renderRegister() {
     addConflictValidation(API.checkConflictURL(), 'Email', 'saveUser');
 
     // call back la soumission du formulaire
-    
+
     $('#createProfilForm').on("submit", function (event) {
         let profil = getFormData($('#createProfilForm'));
         delete profil.matchedPassword;
@@ -340,34 +332,33 @@ function renderRegister() {
         event.preventDefault();// empêcher le fureteur de soumettre une requête de soumission
         showWaitingGif(); // afficher GIF d’attente
         createProfil(profil); // commander la création au service API
-        
+
     });
 }
 
-function createProfil(profil){
+function createProfil(profil) {
     let result = API.register(profil);
     if (result) {
         renderLogin(
-          "Votre compte a été créé. Veuillez prendre vos courriels pour récupérer votre code de vérification qui vous sera demandé lors de votre prochaine connexion."
+            "Votre compte a été créé. Veuillez prendre vos courriels pour récupérer votre code de vérification qui vous sera demandé lors de votre prochaine connexion."
         );
-      } else {
+    } else {
         renderLogin("La création du compte a échouée.");
-      }
+    }
 }
 
 function getFormData($form) {
-  const removeTag = new RegExp("(<[a-zA-Z0-9]+>)|(</[a-zA-Z0-9]+>)", "g");
-  var jsonObject = {};
-  console.log($form.serializeArray());
-  $.each($form.serializeArray(), (index, control) => {
-    jsonObject[control.name] = control.value.replace(removeTag, "");
-  });
-  return jsonObject;
+    const removeTag = new RegExp("(<[a-zA-Z0-9]+>)|(</[a-zA-Z0-9]+>)", "g");
+    var jsonObject = {};
+    console.log($form.serializeArray());
+    $.each($form.serializeArray(), (index, control) => {
+        jsonObject[control.name] = control.value.replace(removeTag, "");
+    });
+    return jsonObject;
 }
 
 function renderModify() {
     eraseContent();
-    isModifying = true;
     updateHeader("Modification du profil");
 
     $("#content").append(`
@@ -449,13 +440,13 @@ function renderModify() {
     `)
 }
 
-function renderAccountVerif(){
-  noTimeout(); // ne pas limiter le temps d’inactivité
-  eraseContent(); // effacer le conteneur #content
-  updateHeader("Verification"); // mettre à jour l’entête et menu
-  console.log(API.retrieveLoggedUser().VerifyCode);
-  //sendVerificationEmail();
-  $("#content").append(`
+function renderAccountVerif() {
+    noTimeout(); // ne pas limiter le temps d’inactivité
+    eraseContent(); // effacer le conteneur #content
+    updateHeader("Vérification"); // mettre à jour l’entête et menu
+    console.log(API.retrieveLoggedUser().VerifyCode);
+    //sendVerificationEmail();
+    $("#content").append(`
     <h3>Veuillez entrer le code de vérification que vous avez reçu par courriel</h3>
     <form class="form" id="validateProfileForm"'>
         <input type="text"
@@ -471,19 +462,19 @@ function renderAccountVerif(){
     <button class="form-control btn-secondary" id="resendCmd">Renvoyer le code</button>
   `)
 
-  $('#validateProfileForm').on("submit", function (event) {
-    let code = getFormData($('#validateProfileForm'));
-    event.preventDefault();// empêcher le fureteur de soumettre une requête de soumission
-    showWaitingGif(); // afficher GIF d’attente
-    
-    if(API.verifyEmail(API.retrieveLoggedUser().Id, code.serializeArray()[0])){
-      renderPhotos();
-    }
-    else{
-      renderAccountVerif();
-    }
-    
-});
+    $('#validateProfileForm').on("submit", function (event) {
+        let code = getFormData($('#validateProfileForm'));
+        event.preventDefault();// empêcher le fureteur de soumettre une requête de soumission
+        showWaitingGif(); // afficher GIF d’attente
+
+        if (API.verifyEmail(API.retrieveLoggedUser().Id, code.serializeArray()[0])) {
+            renderPhotos();
+        }
+        else {
+            renderAccountVerif();
+        }
+
+    });
 }
 
 function renderPhotos() {
@@ -497,13 +488,13 @@ function renderPhotos() {
     );
 }
 
-function sendVerificationEmail(){
-  let html = `
+function sendVerificationEmail() {
+    let html = `
                 Bonjour ${API.retrieveLoggedUser().Name}, <br /> <br />
                 Voici votre code pour confirmer votre adresse courriel.
                 <br />
                 <h3>${API.retrieveLoggedUser().VerifyCode}</h3>
             `;
-        const gmail = new Gmail();
-        gmail.send(API.retrieveLoggedUser().Email, 'Vérification de courriel...', html);
+    const gmail = new Gmail();
+    gmail.send(API.retrieveLoggedUser().Email, 'Vérification de courriel...', html);
 }
